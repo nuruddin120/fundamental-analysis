@@ -5,277 +5,392 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ledger — Bangladesh Stock Market Fundamental Analysis</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#0F2238;
-    --ink-2:#173154;
-    --paper:#FAF7F0;
-    --paper-2:#F1ECDF;
-    --line:#D9D2C2;
-    --text:#1E2430;
-    --text-soft:#5B5747;
-    --gain:#0F7A4B;
-    --gain-bg:#E4F3EB;
-    --loss:#B23A2E;
-    --loss-bg:#FBEAE7;
-    --amber:#A9770E;
-    --amber-bg:#FBF1DD;
-    --gold:#C89B3C;
+    --canvas:#FAFAFA;
+    --bg:#FFFFFF;
+    --surface-2:#F4F5F6;
+    --border:#E7E8EB;
+    --border-strong:#D7D9DD;
+    --text:#0E1116;
+    --text-muted:#5C6370;
+    --text-faint:#9AA0AC;
+
+    --accent:#0F6E52;
+    --accent-hover:#0B5B43;
+    --accent-soft:#E6F3EE;
+    --accent-2:#3D4B8C;
+    --accent-2-soft:#EAEBF6;
+
+    --good:#12805A; --good-bg:#E7F6EF;
+    --avg:#93650A;  --avg-bg:#FBF1DD;
+    --weak:#BC3A2C; --weak-bg:#FCEAE7;
+
+    --shadow-xs:0 1px 2px rgba(15,23,32,.04);
+    --shadow-sm:0 2px 8px rgba(15,23,32,.05);
+    --shadow-md:0 6px 20px rgba(15,23,32,.07);
+    --shadow-lg:0 16px 40px rgba(15,23,32,.12);
+    --radius:10px;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
-    background:var(--paper);
+    background:var(--canvas);
     color:var(--text);
     font-family:'Inter', sans-serif;
     -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    line-height:1.5;
+    font-feature-settings:"tnum" 1, "cv11" 1;
   }
-  h1,h2,h3,.display{
-    font-family:'Fraunces', serif;
-    font-weight:600;
-  }
-  .mono{font-family:'IBM Plex Mono', monospace;}
+  h1,h2,h3{font-family:'Inter', sans-serif; font-weight:700; letter-spacing:-.015em; margin:0;}
+  .mono{font-family:'IBM Plex Mono', monospace; font-variant-numeric:tabular-nums;}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px;}
+  @media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important;} }
+
+  /* ---------- Top accent line ---------- */
+  .topline{height:3px; background:linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%);}
 
   /* ---------- Header ---------- */
   header.site{
-    background:var(--ink);
-    color:var(--paper);
-    padding:22px 30px;
+    background:var(--bg);
+    color:var(--text);
+    padding:18px 30px;
     display:flex;
     align-items:center;
     justify-content:space-between;
     gap:16px;
-    border-bottom:3px solid var(--gold);
+    border-bottom:1px solid var(--border);
+    box-shadow:var(--shadow-xs);
+    position:relative;
+    z-index:5;
   }
-  .brand{display:flex; align-items:center; gap:12px;}
+  .brand{display:flex; align-items:center; gap:11px;}
   .brand .mark{
-    font-family:'Fraunces', serif;
-    font-size:22px;
-    color:var(--gold);
-    border:1.5px solid var(--gold);
-    border-radius:50%;
-    width:44px;height:44px;
+    font-size:14px;
+    font-weight:700;
+    color:#fff;
+    background:linear-gradient(160deg, var(--accent), var(--accent-2));
+    border-radius:8px;
+    width:32px;height:32px;
     display:flex; align-items:center; justify-content:center;
     flex-shrink:0;
+    letter-spacing:-.02em;
+    box-shadow:var(--shadow-sm);
   }
-  .brand h1{margin:0; font-size:21px; color:var(--paper); letter-spacing:.3px;}
-  .brand p{margin:2px 0 0; font-size:12.5px; color:#B9C4D6; font-family:'Inter',sans-serif;}
-  .header-note{font-size:11.5px; color:#9FB0C7; text-align:right; max-width:260px; line-height:1.5; display:none;}
+  .brand h1{font-size:16.5px; color:var(--text); letter-spacing:-.015em; font-weight:700;}
+  .brand p{margin:1px 0 0; font-size:12px; color:var(--text-muted);}
+  .header-note{font-size:12px; color:var(--text-faint); text-align:right; max-width:280px; line-height:1.5; display:none;}
   @media(min-width:780px){.header-note{display:block;}}
 
   .wrap{max-width:1180px; margin:0 auto; padding:0 24px;}
-  @media(max-width:640px){.wrap{padding:0 14px;}}
+  @media(max-width:640px){.wrap{padding:0 16px;}}
 
   /* ---------- Intro band ---------- */
   .intro{
-    background:var(--paper-2);
-    border-bottom:1px solid var(--line);
-    padding:22px 0 24px;
+    background:var(--bg);
+    border-bottom:1px solid var(--border);
+    padding:38px 0 34px;
   }
-  .intro h2{font-size:22px; margin:0 0 8px; color:var(--ink);}
-  .intro p{font-size:14.5px; color:var(--text-soft); line-height:1.65; max-width:78ch; margin:0;}
-  .intro ol{margin:12px 0 0; padding-left:20px; font-size:14px; color:var(--text-soft); line-height:1.8;}
+  .intro h2{font-size:22px; margin:0 0 10px; color:var(--text);}
+  .intro p{font-size:14.5px; color:var(--text-muted); line-height:1.65; max-width:74ch; margin:0;}
+  .intro ol{margin:18px 0 0; padding-left:0; list-style:none; display:grid; gap:9px; max-width:74ch; counter-reset:step;}
+  .intro ol li{font-size:13.5px; color:var(--text-muted); line-height:1.6; display:flex; gap:11px; align-items:flex-start;}
+  .intro ol li::before{
+    content:counter(step);
+    counter-increment:step;
+    flex-shrink:0;
+    width:21px;height:21px;
+    border-radius:50%;
+    background:var(--accent-soft);
+    color:var(--accent);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px; font-weight:600;
+    display:flex; align-items:center; justify-content:center;
+    margin-top:1px;
+  }
 
   /* ---------- Form sections ---------- */
-  .formzone{padding:28px 0 110px;}
+  .formzone{padding:34px 0 116px;}
   details.section{
-    background:#fff;
-    border:1px solid var(--line);
-    border-radius:10px;
-    margin-bottom:14px;
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    margin-bottom:10px;
     overflow:hidden;
+    box-shadow:var(--shadow-xs);
+    transition:box-shadow .15s ease, border-color .15s ease;
   }
+  details.section:hover{border-color:var(--border-strong);}
+  details.section[open]{box-shadow:var(--shadow-sm);}
   details.section summary{
     list-style:none;
     cursor:pointer;
-    padding:14px 18px;
+    padding:15px 18px;
     display:flex;
     align-items:center;
     justify-content:space-between;
-    background:var(--paper-2);
+    background:var(--bg);
     font-weight:600;
-    font-size:15px;
-    color:var(--ink);
+    font-size:14px;
+    color:var(--text);
+    -webkit-tap-highlight-color:transparent;
   }
+  details.section summary:hover{background:var(--surface-2);}
   details.section summary::-webkit-details-marker{display:none;}
+  .summary-left{display:flex; align-items:center; gap:11px;}
+  .summary-left .icon{
+    width:28px;height:28px; border-radius:7px;
+    background:var(--surface-2); color:var(--text-muted);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; transition:background .15s ease, color .15s ease;
+  }
+  details.section[open] .summary-left .icon{background:var(--accent-soft); color:var(--accent);}
+  .summary-left .icon svg{width:15px;height:15px;}
   details.section summary .count{
     font-family:'IBM Plex Mono',monospace;
-    font-size:11px; font-weight:500;
-    color:var(--text-soft);
-    background:#fff;
-    border:1px solid var(--line);
-    border-radius:12px;
-    padding:2px 9px;
+    font-size:10.5px; font-weight:500;
+    color:var(--text-faint);
+    background:var(--surface-2);
+    padding:3px 8px;
+    border-radius:20px;
   }
-  details.section summary .chev{transition:transform .15s ease; color:var(--gold); font-size:13px;}
-  details.section[open] summary .chev{transform:rotate(90deg);}
+  .summary-right{display:flex; align-items:center; gap:10px;}
+  details.section summary .chev{transition:transform .18s ease; color:var(--text-faint); font-size:12px;}
+  details.section[open] summary .chev{transform:rotate(90deg); color:var(--accent);}
+  details.section[open] summary{border-bottom:1px solid var(--border);}
   .section-body{padding:18px;}
-  .section-hint{font-size:13px; color:var(--text-soft); margin:0 0 14px; line-height:1.6;}
+  .section-hint{font-size:12.5px; color:var(--text-muted); margin:0 0 14px; line-height:1.6;}
 
   .fgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px 18px;}
   @media(max-width:900px){.fgrid{grid-template-columns:repeat(2,1fr);}}
   @media(max-width:560px){.fgrid{grid-template-columns:1fr;}}
 
-  .field label{display:block; font-size:13px; color:var(--text); margin-bottom:5px; line-height:1.4;}
-  .field label .unit{color:var(--text-soft); font-size:11.5px;}
+  .fgrid-wide{grid-template-columns:repeat(2,1fr) !important;}
+  @media(max-width:760px){.fgrid-wide{grid-template-columns:1fr !important;}}
+
+  .field-help{
+    margin:7px 2px 0;
+    font-size:12px;
+    color:var(--text-muted);
+    line-height:1.55;
+    background:var(--surface-2);
+    border-left:2.5px solid var(--border-strong);
+    padding:7px 10px;
+    border-radius:0 6px 6px 0;
+  }
+
+  .field label{display:block; font-size:12.5px; color:var(--text); margin-bottom:5px; line-height:1.4;}
+  .field label .unit{color:var(--text-faint); font-size:11px;}
   .field input{
     width:100%;
-    padding:9px 11px;
-    border:1px solid var(--line);
+    padding:8.5px 10px;
+    border:1px solid var(--border-strong);
     border-radius:6px;
     font-family:'IBM Plex Mono',monospace;
-    font-size:14px;
-    background:#fff;
+    font-size:13.5px;
+    background:var(--bg);
     color:var(--text);
+    transition:border-color .12s ease, box-shadow .12s ease;
   }
-  .field input:focus{outline:2px solid var(--gold); outline-offset:1px; border-color:var(--gold);}
+  .field input::placeholder{color:var(--text-faint);}
+  .field input:hover{border-color:var(--text-faint);}
+  .field input:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3.5px var(--accent-soft);}
 
   /* ---------- Sticky action bar ---------- */
   .actionbar{
     position:sticky;
     bottom:0;
     z-index:20;
-    background:linear-gradient(180deg, rgba(250,247,240,0) 0%, var(--paper) 30%);
-    padding:18px 0 0;
+    background:linear-gradient(180deg, rgba(250,250,250,0) 0%, var(--canvas) 45%);
+    padding:24px 0 0;
     margin-top:-6px;
   }
   .actionbar-inner{
-    background:var(--ink);
-    border-radius:12px;
-    padding:14px 20px;
+    background:var(--bg);
+    border:1px solid var(--border-strong);
+    border-radius:var(--radius);
+    padding:14px 18px;
     display:flex;
     align-items:center;
     justify-content:space-between;
-    gap:14px;
-    box-shadow:0 10px 30px rgba(15,34,56,.25);
+    gap:16px;
+    box-shadow:var(--shadow-lg);
     flex-wrap:wrap;
   }
-  .actionbar-inner p{margin:0; color:#B9C4D6; font-size:12.5px; max-width:56ch;}
+  .actionbar-text{flex:1; min-width:220px;}
+  .actionbar-inner p{margin:0; color:var(--text-muted); font-size:12.5px; max-width:56ch;}
+  .progress-track{
+    margin-top:9px;
+    height:4px;
+    background:var(--surface-2);
+    border-radius:3px;
+    overflow:hidden;
+    max-width:280px;
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg, var(--accent), var(--accent-2));
+    width:0%;
+    transition:width .25s ease;
+    border-radius:3px;
+  }
+  .progress-label{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-faint); margin-top:6px; display:inline-block;}
   .calc-btn{
-    background:var(--gold);
-    color:var(--ink);
+    background:var(--accent);
+    color:#fff;
     border:none;
-    padding:12px 26px;
+    padding:11.5px 24px;
     border-radius:8px;
     font-family:'Inter',sans-serif;
-    font-weight:700;
-    font-size:14.5px;
+    font-weight:600;
+    font-size:14px;
     cursor:pointer;
     white-space:nowrap;
+    box-shadow:var(--shadow-sm);
+    transition:background .12s ease, transform .08s ease, box-shadow .12s ease;
   }
-  .calc-btn:hover{filter:brightness(1.06);}
+  .calc-btn:hover{background:var(--accent-hover); box-shadow:var(--shadow-md);}
+  .calc-btn:active{transform:scale(.98);}
 
   /* ---------- Results ---------- */
-  .results{padding:6px 0 70px;}
-  .results-head{margin:26px 0 16px;}
-  .results-head h2{font-size:24px; margin:0 0 6px; color:var(--ink);}
-  .results-head p{font-size:14px; color:var(--text-soft); margin:0;}
+  .results{padding:8px 0 76px;}
+  .results-head{margin:32px 0 18px;}
+  .results-head h2{font-size:22px; margin:0 0 6px; color:var(--text);}
+  .results-head p{font-size:13.5px; color:var(--text-muted); margin:0;}
   .cat-heading{
-    font-size:12px; text-transform:uppercase; letter-spacing:1.2px;
-    color:var(--text-soft); font-weight:600;
-    margin:28px 0 12px;
-    padding-bottom:8px;
-    border-bottom:1px solid var(--line);
+    display:flex; align-items:center; gap:9px;
+    font-size:11.5px; text-transform:uppercase; letter-spacing:1px;
+    color:var(--text-muted); font-weight:700;
+    margin:32px 0 13px;
+    padding-bottom:9px;
+    border-bottom:1px solid var(--border);
   }
-  .cards{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .cat-heading .dot{width:8px;height:8px;border-radius:50%; flex-shrink:0;}
+  .cat-heading.ratio .dot{background:var(--accent);}
+  .cat-heading.model .dot{background:var(--accent-2);}
+  .cards{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
   @media(max-width:900px){.cards{grid-template-columns:1fr;}}
 
+  @keyframes cardIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
   .card{
-    background:#fff;
-    border:1px solid var(--line);
-    border-radius:10px;
-    padding:18px 20px 16px;
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-left:3px solid var(--border-strong);
+    border-radius:var(--radius);
+    padding:17px 19px 15px;
+    box-shadow:var(--shadow-xs);
+    animation:cardIn .28s ease both;
+    transition:box-shadow .15s ease, border-color .15s ease;
   }
-  .card .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--gold); letter-spacing:1px; text-transform:uppercase;}
-  .card h3{font-size:16.5px; margin:5px 0 6px; color:var(--ink); font-weight:600;}
-  .card .cdef{font-size:12.5px; color:var(--text-soft); line-height:1.55; margin:0 0 10px;}
+  .card:hover{box-shadow:var(--shadow-sm);}
+  .card.cat-ratio{border-left-color:var(--accent);}
+  .card.cat-model{border-left-color:var(--accent-2);}
+  .card .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.6px; text-transform:uppercase; font-weight:600;}
+  .card.cat-ratio .eyebrow{color:var(--accent);}
+  .card.cat-model .eyebrow{color:var(--accent-2);}
+  .card h3{font-size:15px; margin:5px 0 6px; color:var(--text); font-weight:650;}
+  .card .cdef{font-size:12.5px; color:var(--text-muted); line-height:1.55; margin:0 0 10px;}
   .card .cformula{
-    display:inline-block;
-    background:var(--paper-2);
-    border-left:3px solid var(--gold);
-    padding:5px 10px;
+    display:block;
     font-family:'IBM Plex Mono',monospace;
-    font-size:11.5px;
-    color:var(--ink);
-    border-radius:0 5px 5px 0;
+    font-size:11px;
+    color:var(--text-muted);
     margin-bottom:12px;
   }
-  .result-row{display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; border-top:1px dashed var(--line); padding-top:12px;}
-  .result-value{font-family:'IBM Plex Mono',monospace; font-size:26px; font-weight:600; color:var(--ink);}
-  .result-unit{font-size:12.5px; color:var(--text-soft); margin-left:5px;}
+  .result-row{display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; border-top:1px solid var(--border); padding-top:12px;}
+  .result-value{font-family:'IBM Plex Mono',monospace; font-size:25px; font-weight:600; color:var(--text); letter-spacing:-.01em;}
+  .result-unit{font-size:12px; color:var(--text-muted); margin-left:5px;}
   .stamp{
-    font-size:11.5px;
-    font-weight:700;
-    padding:5px 12px;
+    font-size:11px;
+    font-weight:600;
+    padding:4px 10px 4px 8px;
     border-radius:20px;
-    border:1.5px dashed currentColor;
-    transform:rotate(-3deg);
-    display:inline-block;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
     white-space:nowrap;
   }
-  .stamp.good{color:var(--gain); background:var(--gain-bg);}
-  .stamp.avg{color:var(--amber); background:var(--amber-bg);}
-  .stamp.weak{color:var(--loss); background:var(--loss-bg);}
-  .stamp.info{color:var(--ink); background:var(--paper-2); border-color:var(--gold);}
+  .stamp::before{content:""; width:6px; height:6px; border-radius:50%; background:currentColor; flex-shrink:0;}
+  .stamp.good{color:var(--good); background:var(--good-bg);}
+  .stamp.avg{color:var(--avg); background:var(--avg-bg);}
+  .stamp.weak{color:var(--weak); background:var(--weak-bg);}
+  .stamp.info{color:var(--accent-2); background:var(--accent-2-soft);}
 
-  .result-note{font-size:12.5px; color:var(--text-soft); margin-top:10px; line-height:1.6;}
-  .breakdown{margin-top:12px; padding-top:10px; border-top:1px dashed var(--line);}
-  .breakdown .lbl{font-size:10.5px; text-transform:uppercase; letter-spacing:.8px; color:var(--text-soft); margin-bottom:6px;}
+  .result-note{font-size:12.5px; color:var(--text-muted); margin-top:10px; line-height:1.6;}
+
+  .breakdown{margin-top:12px;}
+  .breakdown summary{
+    cursor:pointer;
+    font-size:11.5px;
+    color:var(--text-muted);
+    font-weight:500;
+    list-style:none;
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+  }
+  .breakdown summary:hover{color:var(--text);}
+  .breakdown summary::-webkit-details-marker{display:none;}
+  .breakdown summary::before{content:"▸"; font-size:10px; color:var(--text-faint);}
+  .breakdown[open] summary::before{content:"▾";}
   .breakdown pre{
     white-space:pre-wrap;
     font-family:'IBM Plex Mono',monospace;
-    font-size:12px;
-    background:var(--paper-2);
+    font-size:11.5px;
+    background:var(--surface-2);
     padding:9px 10px;
     border-radius:6px;
-    margin:0;
+    margin:8px 0 0;
     line-height:1.6;
-    color:var(--ink-2);
+    color:var(--text);
   }
-  .missing-msg{color:var(--text-soft); font-size:12.5px; padding:2px 0 0; border-top:1px dashed var(--line); padding-top:10px;}
-  .missing-msg b{color:var(--loss);}
-  .error-msg{color:var(--loss); font-size:12.5px; padding-top:10px; border-top:1px dashed var(--line);}
+  .missing-msg{color:var(--text-muted); font-size:12.5px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border);}
+  .missing-msg b{color:var(--weak); font-weight:600;}
+  .error-msg{color:var(--weak); font-size:12.5px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border);}
 
-  .criteria-list{list-style:none; margin:8px 0 0; padding:0; font-size:12px;}
-  .criteria-list li{display:flex; align-items:flex-start; gap:8px; padding:5px 0; border-bottom:1px solid var(--paper-2);}
-  .criteria-list li .mark{flex-shrink:0; width:16px;height:16px; border-radius:50%; display:flex;align-items:center;justify-content:center; font-size:10px; font-weight:700; margin-top:1px;}
-  .criteria-list li.pass .mark{background:var(--gain-bg); color:var(--gain);}
-  .criteria-list li.fail .mark{background:var(--loss-bg); color:var(--loss);}
+  .criteria-list{list-style:none; margin:10px 0 0; padding:0; font-size:12px;}
+  .criteria-list li{display:flex; align-items:flex-start; gap:8px; padding:5px 0; border-bottom:1px solid var(--surface-2);}
+  .criteria-list li .mark{flex-shrink:0; width:15px;height:15px; border-radius:4px; display:flex;align-items:center;justify-content:center; font-size:10px; font-weight:700; margin-top:1px;}
+  .criteria-list li.pass .mark{background:var(--good-bg); color:var(--good);}
+  .criteria-list li.fail .mark{background:var(--weak-bg); color:var(--weak);}
 
   .extra-rows{margin-top:8px; font-size:12px;}
-  .extra-rows div{display:flex; justify-content:space-between; padding:3px 0; color:var(--text-soft);}
-  .extra-rows div b{color:var(--ink); font-family:'IBM Plex Mono',monospace; font-weight:600;}
+  .extra-rows div{display:flex; justify-content:space-between; padding:3px 0; color:var(--text-muted);}
+  .extra-rows div b{color:var(--text); font-family:'IBM Plex Mono',monospace; font-weight:600;}
 
   .placeholder-panel{
     text-align:center;
-    padding:50px 20px;
-    color:var(--text-soft);
-    border:1px dashed var(--line);
-    border-radius:10px;
-    background:#fff;
-    font-size:14px;
+    padding:48px 20px;
+    color:var(--text-muted);
+    border:1px dashed var(--border-strong);
+    border-radius:var(--radius);
+    background:var(--bg);
+    font-size:13.5px;
   }
 
   footer.site{
-    background:var(--ink);
-    color:#9FB0C7;
-    font-size:12.5px;
+    background:var(--bg);
+    color:var(--text-faint);
+    font-size:12px;
     text-align:center;
-    padding:20px 20px 26px;
+    padding:24px 20px 30px;
     line-height:1.7;
+    border-top:1px solid var(--border);
   }
-  footer.site b{color:var(--gold); font-weight:600;}
+  footer.site b{color:var(--text-muted); font-weight:600;}
 </style>
 </head>
 <body>
 
+<div class="topline"></div>
 <header class="site">
   <div class="brand">
     <div class="mark">L</div>
     <div>
-      <h1>LEDGER</h1>
-      <p>Fundamental Analysis for Bangladesh Stock Market Investors</p>
+      <h1>Ledger</h1>
+      <p>Fundamental analysis for Bangladesh stock market investors</p>
     </div>
   </div>
   <div class="header-note">Enter each company's raw financial figures once — every ratio and valuation model below is calculated automatically from the same data set.</div>
@@ -298,7 +413,11 @@
 
   <div class="actionbar">
     <div class="actionbar-inner">
-      <p>You don't need to fill in every single field — only the fields required for a given ratio or model will be used. Anything left blank simply won't be calculated for that metric.</p>
+      <div class="actionbar-text">
+        <p>You don't need to fill in every single field — only the fields required for a given ratio or model will be used.</p>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        <span class="progress-label" id="progressLabel">0 of 0 fields filled</span>
+      </div>
       <button type="button" class="calc-btn" id="calcBtn">Calculate All Metrics →</button>
     </div>
   </div>
@@ -333,9 +452,18 @@ function pf(v){
 /* ===================== Master field list (single source of truth) ===================== */
 /* Every raw input the site needs, organized into sections. Field "key" is shared across
    every ratio/model that needs it — enter each number only once. */
+var ICONS = {
+  trend:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>',
+  doc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>',
+  layers:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
+  droplet:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2s6 7.7 6 11.2A6 6 0 0 1 6 13.2C6 9.7 12 2 12 2z"/></svg>',
+  sliders:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>',
+  percent:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>'
+};
+
 var SECTIONS = [
   {
-    id:'market', title:'Market & Per-Share Data', hint:'Used in valuation ratios, dividend, and risk-based models.',
+    id:'market', title:'Market & Per-Share Data', icon:'trend', hint:'Used in valuation ratios, dividend, and risk-based models.',
     fields:[
       {k:'marketPrice', l:'Market Price per Share', u:'BDT'},
       {k:'epsCurrent', l:'EPS — Current Year', u:'BDT'},
@@ -348,7 +476,7 @@ var SECTIONS = [
     ]
   },
   {
-    id:'isCur', title:'Income Statement — Current Year', hint:'',
+    id:'isCur', title:'Income Statement — Current Year', icon:'doc', hint:'',
     fields:[
       {k:'revenueCurrent', l:'Revenue / Sales', u:'BDT'},
       {k:'cogsCurrent', l:'Cost of Goods Sold (COGS)', u:'BDT'},
@@ -360,7 +488,7 @@ var SECTIONS = [
     ]
   },
   {
-    id:'isPrev', title:'Income Statement — Previous Year', hint:'',
+    id:'isPrev', title:'Income Statement — Previous Year', icon:'doc', hint:'',
     fields:[
       {k:'revenuePrevious', l:'Revenue / Sales', u:'BDT'},
       {k:'cogsPrevious', l:'Cost of Goods Sold (COGS)', u:'BDT'},
@@ -370,7 +498,7 @@ var SECTIONS = [
     ]
   },
   {
-    id:'bsCur', title:'Balance Sheet — Current Year', hint:'',
+    id:'bsCur', title:'Balance Sheet — Current Year', icon:'layers', hint:'',
     fields:[
       {k:'totalAssetsCurrent', l:'Total Assets', u:'BDT'},
       {k:'currentAssetsCurrent', l:'Current Assets', u:'BDT'},
@@ -385,7 +513,7 @@ var SECTIONS = [
     ]
   },
   {
-    id:'bsPrev', title:'Balance Sheet — Previous Year', hint:'',
+    id:'bsPrev', title:'Balance Sheet — Previous Year', icon:'layers', hint:'',
     fields:[
       {k:'totalAssetsPrevious', l:'Total Assets', u:'BDT'},
       {k:'currentAssetsPrevious', l:'Current Assets', u:'BDT'},
@@ -397,32 +525,45 @@ var SECTIONS = [
     ]
   },
   {
-    id:'cf', title:'Cash Flow Statement', hint:'',
+    id:'cf', title:'Cash Flow Statement', icon:'droplet', hint:'',
     fields:[
       {k:'cfoCurrent', l:'Cash Flow from Operations (CFO)', u:'BDT'}
     ]
   },
   {
-    id:'assump', title:'Valuation Model Assumptions', hint:'These are forecasts/assumptions you choose, used only by the Dividend Growth Model, DCF, and CAPM.',
+    id:'assump', title:'Valuation Model Assumptions', icon:'sliders', hint:'These are forecasts you choose yourself, not figures copied from a financial statement. Each one below explains what it means and how analysts typically arrive at a reasonable number.',
     fields:[
-      {k:'dividendGrowthRate', l:'Expected Dividend Growth Rate (g) — for Dividend Growth Model', u:'%'},
-      {k:'requiredReturn', l:'Required Rate of Return (r) — for Dividend Growth Model', u:'%'},
-      {k:'fcfCurrent', l:'Current Free Cash Flow (FCF) — for DCF', u:'BDT'},
-      {k:'fcfGrowthRate', l:'FCF Growth Rate during Projection Period — for DCF', u:'%'},
-      {k:'projectionYears', l:'Projection Period — for DCF', u:'years'},
-      {k:'wacc', l:'Discount Rate / WACC — for DCF', u:'%'},
-      {k:'terminalGrowthRate', l:'Terminal Growth Rate — for DCF', u:'%'},
-      {k:'netDebt', l:'Net Debt (optional) — for DCF', u:'BDT'},
-      {k:'riskFreeRate', l:'Risk-Free Rate — for CAPM', u:'%'},
-      {k:'marketReturn', l:'Expected Market Return — for CAPM', u:'%'}
+      {k:'dividendGrowthRate', l:'Expected Dividend Growth Rate (g) · Dividend Growth Model', u:'%',
+        help:'What it means: how fast you expect the dividend per share to keep growing every year, forever. How to find it: look at the company\'s dividend-per-share over the last 5–10 years and calculate its CAGR (you can use the CAGR tool below for this). Keep it modest and realistic — for a mature company, close to or below Bangladesh\'s long-term nominal GDP growth (roughly 6–8%) is a sensible upper limit.'},
+      {k:'requiredReturn', l:'Required Rate of Return (r) · Dividend Growth Model', u:'%',
+        help:'What it means: the minimum yearly return you personally want for taking the risk of holding this stock. How to find it: the simplest approach is to calculate CAPM further down this page and use that result here. As a rule of thumb, BD equity investors often use 12–15%, since it must always be higher than the dividend growth rate (g) above.'},
+      {k:'fcfCurrent', l:'Current Free Cash Flow (FCF) · DCF', u:'BDT',
+        help:'What it means: the actual spare cash the business generated this year after running operations and paying for equipment/property — cash truly free to pay out or reinvest. How to find it: FCF = Cash Flow from Operations (CFO) − Capital Expenditure (CapEx). Both appear in the Cash Flow Statement; CFO is entered above, and CapEx is usually listed as "purchase of property, plant & equipment" under investing activities.'},
+      {k:'fcfGrowthRate', l:'FCF Growth Rate during Projection Period · DCF', u:'%',
+        help:'What it means: how fast you expect free cash flow to grow each year over the next few years (the forecast window), before growth settles into the long-run terminal rate. How to find it: base it on the company\'s recent revenue/profit growth trend or management\'s own guidance. Typical ranges: 10–20% for a fast-growing company, 5–10% for a stable, mature one.'},
+      {k:'projectionYears', l:'Projection Period · DCF', u:'years',
+        help:'What it means: how many years you want to forecast cash flows individually before switching to a single "terminal value" for everything afterward. How to find it: there\'s no strict rule — 5 years is the most common default; faster-growing companies are sometimes projected over 10 years.'},
+      {k:'wacc', l:'Discount Rate / WACC · DCF', u:'%',
+        help:'What it means: Weighted Average Cost of Capital — the blended annual return required by both shareholders and lenders combined; it\'s used to convert future cash into today\'s money. How to find it: a simplified version is WACC = (Cost of Equity × % financed by equity) + (Cost of Debt × (1 − tax rate) × % financed by debt). If that\'s too much, many investors simply use their CAPM result (below) as a stand-in discount rate.'},
+      {k:'terminalGrowthRate', l:'Terminal Growth Rate · DCF', u:'%',
+        help:'What it means: the slow, steady growth rate you assume the company\'s cash flows will grow at forever, once the projection period ends. How to find it: keep this conservative — usually close to a country\'s long-term nominal GDP growth (around 5–7% for Bangladesh) — and it must always be lower than your WACC above.'},
+      {k:'netDebt', l:'Net Debt (optional) · DCF', u:'BDT',
+        help:'What it means: total borrowings minus cash on hand — used to convert the whole company\'s value (Enterprise Value) into the value belonging just to shareholders. How to find it: Net Debt = Total Debt (short-term + long-term borrowings) − Cash & Cash Equivalents, both found on the Balance Sheet. Leave blank to treat net debt as zero.'},
+      {k:'riskFreeRate', l:'Risk-Free Rate · CAPM', u:'%',
+        help:'What it means: the return on the safest available investment, used as the starting point ("floor") for any expected return calculation. How to find it: use the current yield on a Bangladesh Government Treasury Bond — the 10-year BGTB yield is the most commonly used benchmark.'},
+      {k:'marketReturn', l:'Expected Market Return · CAPM', u:'%',
+        help:'What it means: the average annual return you expect from the overall stock market (not just one company) going forward. How to find it: look at the long-term historical average annual return of the DSEX (Dhaka Stock Exchange broad index); many analysts use 12–15% as a working estimate for Bangladesh\'s market.'}
     ]
   },
   {
-    id:'cagr', title:'Custom CAGR Inputs', hint:'Use this for the compound annual growth rate of any figure — revenue, share price, EPS, or anything else over multiple years.',
+    id:'cagr', title:'Custom CAGR Inputs', icon:'percent', hint:'This calculates the average annual growth rate between any two points in time — use it for revenue, EPS, share price, dividends, or any other figure you want to track over multiple years.',
     fields:[
-      {k:'cagrBeginningValue', l:'Beginning Value', u:''},
-      {k:'cagrEndingValue', l:'Ending Value', u:''},
-      {k:'cagrYears', l:'Number of Years', u:'years'}
+      {k:'cagrBeginningValue', l:'Beginning Value', u:'',
+        help:'What it means: the value of whatever you\'re measuring at the start of your chosen period. How to find it: pick one consistent metric (e.g. Revenue, EPS, or share price) and note its value in the first year — for example, Revenue in 2020 if you\'re measuring a 2020-to-2025 growth trend.'},
+      {k:'cagrEndingValue', l:'Ending Value', u:'',
+        help:'What it means: the value of that same metric at the end of your chosen period. How to find it: use the same metric\'s most recent value — for example, Revenue in 2025, continuing the example above.'},
+      {k:'cagrYears', l:'Number of Years', u:'years',
+        help:'What it means: how many years separate the beginning value from the ending value. How to find it: simply subtract the two years — e.g. 2025 − 2020 = 5 years.'}
     ]
   }
 ];
@@ -823,18 +964,35 @@ function buildForm(){
   var html = '';
   SECTIONS.forEach(function(s, i){
     html += '<details class="section" open><summary>'+
-      '<span>'+s.title+'</span>'+
-      '<span style="display:flex; align-items:center; gap:10px;"><span class="count">'+s.fields.length+' fields</span><span class="chev">&#9656;</span></span>'+
+      '<span class="summary-left"><span class="icon">'+(ICONS[s.icon]||'')+'</span><span>'+s.title+'</span></span>'+
+      '<span class="summary-right"><span class="count">'+s.fields.length+' fields</span><span class="chev">&#9656;</span></span>'+
       '</summary><div class="section-body">';
     if(s.hint) html += '<p class="section-hint">'+s.hint+'</p>';
-    html += '<div class="fgrid">';
+    var hasHelp = s.fields.some(function(f){ return !!f.help; });
+    html += '<div class="fgrid'+(hasHelp?' fgrid-wide':'')+'">';
     s.fields.forEach(function(f){
       html += '<div class="field"><label>'+f.l+' <span class="unit">'+(f.u?('('+f.u+')'):'')+'</span></label>'+
-        '<input type="number" step="any" id="inp_'+f.k+'" placeholder="Enter value"></div>';
+        '<input type="number" step="any" id="inp_'+f.k+'" placeholder="Enter value">'+
+        (f.help ? '<p class="field-help">'+f.help+'</p>' : '')+
+        '</div>';
     });
     html += '</div></div></details>';
   });
   form.innerHTML = html;
+
+  var allInputs = form.querySelectorAll('input');
+  var total = allInputs.length;
+  var fillEl = document.getElementById('progressFill');
+  var labelEl = document.getElementById('progressLabel');
+  function updateProgress(){
+    var filled = 0;
+    allInputs.forEach(function(el){ if(el.value.trim()!=='') filled++; });
+    var pct = total ? Math.round(filled/total*100) : 0;
+    fillEl.style.width = pct+'%';
+    labelEl.textContent = filled+' of '+total+' fields filled';
+  }
+  allInputs.forEach(function(el){ el.addEventListener('input', updateProgress); });
+  updateProgress();
 }
 
 /* ===================== Calculate & render results ===================== */
@@ -854,7 +1012,7 @@ function missingFields(need, data){
 }
 
 function renderCard(m, data){
-  var html = '<div class="card">';
+  var html = '<div class="card cat-'+m.cat+'">';
   html += '<div class="eyebrow">'+(m.cat==='ratio'?'Ratio':'Model')+' · '+m.tag+'</div>';
   html += '<h3>'+m.title+'</h3>';
   html += '<p class="cdef">'+m.def+'</p>';
@@ -897,7 +1055,7 @@ function renderCard(m, data){
   }
 
   if(out.text){
-    html += '<div class="breakdown"><div class="lbl">How this was calculated</div><pre>'+out.text+'</pre></div>';
+    html += '<details class="breakdown"><summary>Show calculation</summary><pre>'+out.text+'</pre></details>';
   }
 
   html += '</div>';
@@ -913,10 +1071,10 @@ function calculateAll(){
   var ratios = METRICS.filter(function(m){ return m.cat==='ratio'; });
   var models = METRICS.filter(function(m){ return m.cat==='model'; });
 
-  var html = '<div class="cat-heading">Ratios</div><div class="cards">';
+  var html = '<div class="cat-heading ratio"><span class="dot"></span>Ratios</div><div class="cards">';
   ratios.forEach(function(m){ html += renderCard(m, data); });
   html += '</div>';
-  html += '<div class="cat-heading">Valuation & Scoring Models</div><div class="cards">';
+  html += '<div class="cat-heading model"><span class="dot"></span>Valuation & Scoring Models</div><div class="cards">';
   models.forEach(function(m){ html += renderCard(m, data); });
   html += '</div>';
 
