@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ledger — Bangladesh Stock Market Fundamental Analysis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0F2238;
+    --ink-2:#173154;
+    --paper:#FAF7F0;
+    --paper-2:#F1ECDF;
+    --line:#D9D2C2;
+    --text:#1E2430;
+    --text-soft:#5B5747;
+    --gain:#0F7A4B;
+    --gain-bg:#E4F3EB;
+    --loss:#B23A2E;
+    --loss-bg:#FBEAE7;
+    --amber:#A9770E;
+    --amber-bg:#FBF1DD;
+    --gold:#C89B3C;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+
+  /* ---------- Header ---------- */
+  header.site{
+    background:var(--ink);
+    color:var(--paper);
+    padding:22px 30px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    border-bottom:3px solid var(--gold);
+  }
+  .brand{display:flex; align-items:center; gap:12px;}
+  .brand .mark{
+    font-family:'Fraunces', serif;
+    font-size:22px;
+    color:var(--gold);
+    border:1.5px solid var(--gold);
+    border-radius:50%;
+    width:44px;height:44px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .brand h1{margin:0; font-size:21px; color:var(--paper); letter-spacing:.3px;}
+  .brand p{margin:2px 0 0; font-size:12.5px; color:#B9C4D6; font-family:'Inter',sans-serif;}
+  .header-note{font-size:11.5px; color:#9FB0C7; text-align:right; max-width:260px; line-height:1.5; display:none;}
+  @media(min-width:780px){.header-note{display:block;}}
+
+  .wrap{max-width:1180px; margin:0 auto; padding:0 24px;}
+  @media(max-width:640px){.wrap{padding:0 14px;}}
+
+  /* ---------- Intro band ---------- */
+  .intro{
+    background:var(--paper-2);
+    border-bottom:1px solid var(--line);
+    padding:22px 0 24px;
+  }
+  .intro h2{font-size:22px; margin:0 0 8px; color:var(--ink);}
+  .intro p{font-size:14.5px; color:var(--text-soft); line-height:1.65; max-width:78ch; margin:0;}
+  .intro ol{margin:12px 0 0; padding-left:20px; font-size:14px; color:var(--text-soft); line-height:1.8;}
+
+  /* ---------- Form sections ---------- */
+  .formzone{padding:28px 0 110px;}
+  details.section{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:10px;
+    margin-bottom:14px;
+    overflow:hidden;
+  }
+  details.section summary{
+    list-style:none;
+    cursor:pointer;
+    padding:14px 18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--paper-2);
+    font-weight:600;
+    font-size:15px;
+    color:var(--ink);
+  }
+  details.section summary::-webkit-details-marker{display:none;}
+  details.section summary .count{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px; font-weight:500;
+    color:var(--text-soft);
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:2px 9px;
+  }
+  details.section summary .chev{transition:transform .15s ease; color:var(--gold); font-size:13px;}
+  details.section[open] summary .chev{transform:rotate(90deg);}
+  .section-body{padding:18px;}
+  .section-hint{font-size:13px; color:var(--text-soft); margin:0 0 14px; line-height:1.6;}
+
+  .fgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px 18px;}
+  @media(max-width:900px){.fgrid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:560px){.fgrid{grid-template-columns:1fr;}}
+
+  .field label{display:block; font-size:13px; color:var(--text); margin-bottom:5px; line-height:1.4;}
+  .field label .unit{color:var(--text-soft); font-size:11.5px;}
+  .field input{
+    width:100%;
+    padding:9px 11px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:14px;
+    background:#fff;
+    color:var(--text);
+  }
+  .field input:focus{outline:2px solid var(--gold); outline-offset:1px; border-color:var(--gold);}
+
+  /* ---------- Sticky action bar ---------- */
+  .actionbar{
+    position:sticky;
+    bottom:0;
+    z-index:20;
+    background:linear-gradient(180deg, rgba(250,247,240,0) 0%, var(--paper) 30%);
+    padding:18px 0 0;
+    margin-top:-6px;
+  }
+  .actionbar-inner{
+    background:var(--ink);
+    border-radius:12px;
+    padding:14px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    box-shadow:0 10px 30px rgba(15,34,56,.25);
+    flex-wrap:wrap;
+  }
+  .actionbar-inner p{margin:0; color:#B9C4D6; font-size:12.5px; max-width:56ch;}
+  .calc-btn{
+    background:var(--gold);
+    color:var(--ink);
+    border:none;
+    padding:12px 26px;
+    border-radius:8px;
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    font-size:14.5px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .calc-btn:hover{filter:brightness(1.06);}
+
+  /* ---------- Results ---------- */
+  .results{padding:6px 0 70px;}
+  .results-head{margin:26px 0 16px;}
+  .results-head h2{font-size:24px; margin:0 0 6px; color:var(--ink);}
+  .results-head p{font-size:14px; color:var(--text-soft); margin:0;}
+  .cat-heading{
+    font-size:12px; text-transform:uppercase; letter-spacing:1.2px;
+    color:var(--text-soft); font-weight:600;
+    margin:28px 0 12px;
+    padding-bottom:8px;
+    border-bottom:1px solid var(--line);
+  }
+  .cards{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:900px){.cards{grid-template-columns:1fr;}}
+
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:18px 20px 16px;
+  }
+  .card .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--gold); letter-spacing:1px; text-transform:uppercase;}
+  .card h3{font-size:16.5px; margin:5px 0 6px; color:var(--ink); font-weight:600;}
+  .card .cdef{font-size:12.5px; color:var(--text-soft); line-height:1.55; margin:0 0 10px;}
+  .card .cformula{
+    display:inline-block;
+    background:var(--paper-2);
+    border-left:3px solid var(--gold);
+    padding:5px 10px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    color:var(--ink);
+    border-radius:0 5px 5px 0;
+    margin-bottom:12px;
+  }
+  .result-row{display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; border-top:1px dashed var(--line); padding-top:12px;}
+  .result-value{font-family:'IBM Plex Mono',monospace; font-size:26px; font-weight:600; color:var(--ink);}
+  .result-unit{font-size:12.5px; color:var(--text-soft); margin-left:5px;}
+  .stamp{
+    font-size:11.5px;
+    font-weight:700;
+    padding:5px 12px;
+    border-radius:20px;
+    border:1.5px dashed currentColor;
+    transform:rotate(-3deg);
+    display:inline-block;
+    white-space:nowrap;
+  }
+  .stamp.good{color:var(--gain); background:var(--gain-bg);}
+  .stamp.avg{color:var(--amber); background:var(--amber-bg);}
+  .stamp.weak{color:var(--loss); background:var(--loss-bg);}
+  .stamp.info{color:var(--ink); background:var(--paper-2); border-color:var(--gold);}
+
+  .result-note{font-size:12.5px; color:var(--text-soft); margin-top:10px; line-height:1.6;}
+  .breakdown{margin-top:12px; padding-top:10px; border-top:1px dashed var(--line);}
+  .breakdown .lbl{font-size:10.5px; text-transform:uppercase; letter-spacing:.8px; color:var(--text-soft); margin-bottom:6px;}
+  .breakdown pre{
+    white-space:pre-wrap;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    background:var(--paper-2);
+    padding:9px 10px;
+    border-radius:6px;
+    margin:0;
+    line-height:1.6;
+    color:var(--ink-2);
+  }
+  .missing-msg{color:var(--text-soft); font-size:12.5px; padding:2px 0 0; border-top:1px dashed var(--line); padding-top:10px;}
+  .missing-msg b{color:var(--loss);}
+  .error-msg{color:var(--loss); font-size:12.5px; padding-top:10px; border-top:1px dashed var(--line);}
+
+  .criteria-list{list-style:none; margin:8px 0 0; padding:0; font-size:12px;}
+  .criteria-list li{display:flex; align-items:flex-start; gap:8px; padding:5px 0; border-bottom:1px solid var(--paper-2);}
+  .criteria-list li .mark{flex-shrink:0; width:16px;height:16px; border-radius:50%; display:flex;align-items:center;justify-content:center; font-size:10px; font-weight:700; margin-top:1px;}
+  .criteria-list li.pass .mark{background:var(--gain-bg); color:var(--gain);}
+  .criteria-list li.fail .mark{background:var(--loss-bg); color:var(--loss);}
+
+  .extra-rows{margin-top:8px; font-size:12px;}
+  .extra-rows div{display:flex; justify-content:space-between; padding:3px 0; color:var(--text-soft);}
+  .extra-rows div b{color:var(--ink); font-family:'IBM Plex Mono',monospace; font-weight:600;}
+
+  .placeholder-panel{
+    text-align:center;
+    padding:50px 20px;
+    color:var(--text-soft);
+    border:1px dashed var(--line);
+    border-radius:10px;
+    background:#fff;
+    font-size:14px;
+  }
+
+  footer.site{
+    background:var(--ink);
+    color:#9FB0C7;
+    font-size:12.5px;
+    text-align:center;
+    padding:20px 20px 26px;
+    line-height:1.7;
+  }
+  footer.site b{color:var(--gold); font-weight:600;}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="brand">
+    <div class="mark">L</div>
+    <div>
+      <h1>LEDGER</h1>
+      <p>Fundamental Analysis for Bangladesh Stock Market Investors</p>
+    </div>
+  </div>
+  <div class="header-note">Enter each company's raw financial figures once — every ratio and valuation model below is calculated automatically from the same data set.</div>
+</header>
+
+<div class="intro">
+  <div class="wrap">
+    <h2>One data entry, every metric calculated</h2>
+    <p>Fill in the raw financial data from a company's annual report (income statement, balance sheet, cash flow statement, and market data) in the sections below. Each field is used across the relevant ratios and models automatically — you never enter the same number twice.</p>
+    <ol>
+      <li>Expand each section and enter the figures you have (leave anything unavailable blank).</li>
+      <li>Click <strong>Calculate All Metrics</strong>.</li>
+      <li>Scroll down to see every ratio and model computed, with its formula, interpretation, and a step-by-step breakdown.</li>
+    </ol>
+  </div>
+</div>
+
+<div class="wrap formzone" id="formzone">
+  <form id="dataForm"></form>
+
+  <div class="actionbar">
+    <div class="actionbar-inner">
+      <p>You don't need to fill in every single field — only the fields required for a given ratio or model will be used. Anything left blank simply won't be calculated for that metric.</p>
+      <button type="button" class="calc-btn" id="calcBtn">Calculate All Metrics →</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap results" id="resultsWrap">
+  <div class="results-head">
+    <h2>Results</h2>
+    <p id="resultsSub">Fill in the data above and click "Calculate All Metrics" to see your results here.</p>
+  </div>
+  <div id="resultsBody"></div>
+</div>
+
+<footer class="site">
+  This tool is built for <b>educational and analytical purposes only</b> — it is not investment advice.<br>
+  Always verify figures against a company's audited financial statements, and consult a licensed investment analyst before making investment decisions.
+</footer>
+
+<script>
+/* ===================== Helpers ===================== */
+function fmt(n, d){
+  if(n===null || n===undefined || !isFinite(n)) return '—';
+  d = (d===undefined)?2:d;
+  return n.toLocaleString('en-US',{maximumFractionDigits:d, minimumFractionDigits:0});
+}
+function pf(v){
+  if(v===undefined || v===null || v==='') return NaN;
+  var n = parseFloat(v);
+  return isNaN(n) ? NaN : n;
+}
+
+/* ===================== Master field list (single source of truth) ===================== */
+/* Every raw input the site needs, organized into sections. Field "key" is shared across
+   every ratio/model that needs it — enter each number only once. */
+var SECTIONS = [
+  {
+    id:'market', title:'Market & Per-Share Data', hint:'Used in valuation ratios, dividend, and risk-based models.',
+    fields:[
+      {k:'marketPrice', l:'Market Price per Share', u:'BDT'},
+      {k:'epsCurrent', l:'EPS — Current Year', u:'BDT'},
+      {k:'epsPrevious', l:'EPS — Previous Year', u:'BDT'},
+      {k:'dividendPerShare', l:'Dividend per Share — Current Year', u:'BDT'},
+      {k:'sharesOutstandingCurrent', l:'Shares Outstanding — Current Year', u:'shares'},
+      {k:'sharesOutstandingPrevious', l:'Shares Outstanding — Previous Year', u:'shares'},
+      {k:'marketCap', l:'Market Capitalization (Market Value of Equity)', u:'BDT'},
+      {k:'beta', l:'Beta (share volatility vs. the market)', u:''}
+    ]
+  },
+  {
+    id:'isCur', title:'Income Statement — Current Year', hint:'',
+    fields:[
+      {k:'revenueCurrent', l:'Revenue / Sales', u:'BDT'},
+      {k:'cogsCurrent', l:'Cost of Goods Sold (COGS)', u:'BDT'},
+      {k:'sgaCurrent', l:'SG&A Expenses', u:'BDT'},
+      {k:'ebitCurrent', l:'EBIT (Operating Profit before Interest & Tax)', u:'BDT'},
+      {k:'interestExpenseCurrent', l:'Interest Expense', u:'BDT'},
+      {k:'depreciationCurrent', l:'Depreciation Expense', u:'BDT'},
+      {k:'netIncomeCurrent', l:'Net Income', u:'BDT'}
+    ]
+  },
+  {
+    id:'isPrev', title:'Income Statement — Previous Year', hint:'',
+    fields:[
+      {k:'revenuePrevious', l:'Revenue / Sales', u:'BDT'},
+      {k:'cogsPrevious', l:'Cost of Goods Sold (COGS)', u:'BDT'},
+      {k:'sgaPrevious', l:'SG&A Expenses', u:'BDT'},
+      {k:'depreciationPrevious', l:'Depreciation Expense', u:'BDT'},
+      {k:'netIncomePrevious', l:'Net Income', u:'BDT'}
+    ]
+  },
+  {
+    id:'bsCur', title:'Balance Sheet — Current Year', hint:'',
+    fields:[
+      {k:'totalAssetsCurrent', l:'Total Assets', u:'BDT'},
+      {k:'currentAssetsCurrent', l:'Current Assets', u:'BDT'},
+      {k:'currentLiabilitiesCurrent', l:'Current Liabilities', u:'BDT'},
+      {k:'totalLiabilitiesCurrent', l:'Total Liabilities', u:'BDT'},
+      {k:'longTermDebtCurrent', l:'Long-Term Debt', u:'BDT'},
+      {k:'totalDebtCurrent', l:'Total Interest-Bearing Debt (ST + LT)', u:'BDT'},
+      {k:'totalEquityCurrent', l:'Total Shareholders\' Equity', u:'BDT'},
+      {k:'retainedEarningsCurrent', l:'Retained Earnings', u:'BDT'},
+      {k:'receivablesCurrent', l:'Accounts Receivable', u:'BDT'},
+      {k:'ppeCurrent', l:'Property, Plant & Equipment (Gross)', u:'BDT'}
+    ]
+  },
+  {
+    id:'bsPrev', title:'Balance Sheet — Previous Year', hint:'',
+    fields:[
+      {k:'totalAssetsPrevious', l:'Total Assets', u:'BDT'},
+      {k:'currentAssetsPrevious', l:'Current Assets', u:'BDT'},
+      {k:'currentLiabilitiesPrevious', l:'Current Liabilities', u:'BDT'},
+      {k:'longTermDebtPrevious', l:'Long-Term Debt', u:'BDT'},
+      {k:'totalDebtPrevious', l:'Total Interest-Bearing Debt (ST + LT)', u:'BDT'},
+      {k:'receivablesPrevious', l:'Accounts Receivable', u:'BDT'},
+      {k:'ppePrevious', l:'Property, Plant & Equipment (Gross)', u:'BDT'}
+    ]
+  },
+  {
+    id:'cf', title:'Cash Flow Statement', hint:'',
+    fields:[
+      {k:'cfoCurrent', l:'Cash Flow from Operations (CFO)', u:'BDT'}
+    ]
+  },
+  {
+    id:'assump', title:'Valuation Model Assumptions', hint:'These are forecasts/assumptions you choose, used only by the Dividend Growth Model, DCF, and CAPM.',
+    fields:[
+      {k:'dividendGrowthRate', l:'Expected Dividend Growth Rate (g) — for Dividend Growth Model', u:'%'},
+      {k:'requiredReturn', l:'Required Rate of Return (r) — for Dividend Growth Model', u:'%'},
+      {k:'fcfCurrent', l:'Current Free Cash Flow (FCF) — for DCF', u:'BDT'},
+      {k:'fcfGrowthRate', l:'FCF Growth Rate during Projection Period — for DCF', u:'%'},
+      {k:'projectionYears', l:'Projection Period — for DCF', u:'years'},
+      {k:'wacc', l:'Discount Rate / WACC — for DCF', u:'%'},
+      {k:'terminalGrowthRate', l:'Terminal Growth Rate — for DCF', u:'%'},
+      {k:'netDebt', l:'Net Debt (optional) — for DCF', u:'BDT'},
+      {k:'riskFreeRate', l:'Risk-Free Rate — for CAPM', u:'%'},
+      {k:'marketReturn', l:'Expected Market Return — for CAPM', u:'%'}
+    ]
+  },
+  {
+    id:'cagr', title:'Custom CAGR Inputs', hint:'Use this for the compound annual growth rate of any figure — revenue, share price, EPS, or anything else over multiple years.',
+    fields:[
+      {k:'cagrBeginningValue', l:'Beginning Value', u:''},
+      {k:'cagrEndingValue', l:'Ending Value', u:''},
+      {k:'cagrYears', l:'Number of Years', u:'years'}
+    ]
+  }
+];
+
+var FIELD_LABEL = {};
+SECTIONS.forEach(function(s){ s.fields.forEach(function(f){ FIELD_LABEL[f.k] = f.l; }); });
+
+/* ===================== Metric definitions ===================== */
+/* need: list of field keys required (besides those with "optional:true" handled inline) */
+var METRICS = [
+
+/* ---------------- RATIOS ---------------- */
+{
+  id:'pe', cat:'ratio', tag:'P/E', title:'Price-to-Earnings Ratio (P/E)',
+  def:'Shows how many times the market price is relative to the company\'s earnings per share. A lower P/E can suggest a relatively cheaper stock, though the right level varies by sector.',
+  formula:'P/E = Market Price ÷ EPS',
+  need:['marketPrice','epsCurrent'],
+  calc:function(d){
+    if(d.epsCurrent===0) return {error:'EPS cannot be zero.'};
+    var r = d.marketPrice/d.epsCurrent;
+    var tone = r<15?'good':(r<=25?'avg':'weak');
+    var note = r<15?'Relatively low valuation — worth a closer look.':(r<=25?'Sits within the typical market range.':'Relatively high valuation — check if growth expectations justify it.');
+    return {value:r, unit:'x', tone:tone, note:note, text: fmt(d.marketPrice)+' ÷ '+fmt(d.epsCurrent)+' = '+fmt(r)+'x'};
+  }
+},
+{
+  id:'peg', cat:'ratio', tag:'PEG', title:'PEG Ratio',
+  def:'Adjusts the P/E ratio for the company\'s earnings growth rate, showing whether a stock is cheap or expensive relative to its growth, not just its P/E alone.',
+  formula:'PEG = P/E ÷ EPS Growth Rate (%)',
+  need:['marketPrice','epsCurrent','epsPrevious'],
+  calc:function(d){
+    if(d.epsCurrent===0) return {error:'EPS cannot be zero.'};
+    if(d.epsPrevious===0) return {error:'Previous year EPS cannot be zero.'};
+    var pe = d.marketPrice/d.epsCurrent;
+    var g = (d.epsCurrent-d.epsPrevious)/Math.abs(d.epsPrevious)*100;
+    if(g===0) return {error:'EPS growth rate came out to zero — PEG is undefined.'};
+    var r = pe/g;
+    var tone = r<1?'good':(r<=2?'avg':'weak');
+    var note = r<1?'Looks undervalued relative to its growth.':(r<=2?'Close to a fair valuation.':'Looks expensive relative to its growth.');
+    return {value:r, unit:'', tone:tone, note:note, text:'P/E = '+fmt(pe)+', EPS growth = '+fmt(g)+'%\nPEG = '+fmt(pe)+' ÷ '+fmt(g)+' = '+fmt(r)};
+  }
+},
+{
+  id:'pb', cat:'ratio', tag:'P/B', title:'Price-to-Book Ratio (P/B)',
+  def:'Shows how many times the market price is relative to the company\'s book value per share (net asset value as recorded on the balance sheet).',
+  formula:'Book Value/Share = Total Equity ÷ Shares Outstanding, then P/B = Market Price ÷ Book Value',
+  need:['marketPrice','totalEquityCurrent','sharesOutstandingCurrent'],
+  calc:function(d){
+    if(d.sharesOutstandingCurrent===0) return {error:'Shares outstanding cannot be zero.'};
+    var bv = d.totalEquityCurrent/d.sharesOutstandingCurrent;
+    if(bv===0) return {error:'Book value came out to zero.'};
+    var r = d.marketPrice/bv;
+    var tone = r<1?'good':(r<=3?'avg':'weak');
+    var note = r<1?'Trading below book value — possibly undervalued, but check why.':(r<=3?'Within a typical range.':'Trading at a large premium to book value.');
+    return {value:r, unit:'x', tone:tone, note:note,
+      text:'Book Value = '+fmt(d.totalEquityCurrent)+' ÷ '+fmt(d.sharesOutstandingCurrent)+' = '+fmt(bv)+' BDT\nP/B = '+fmt(d.marketPrice)+' ÷ '+fmt(bv)+' = '+fmt(r)};
+  }
+},
+{
+  id:'roe', cat:'ratio', tag:'ROE', title:'Return on Equity (ROE)',
+  def:'Measures how much profit a company generates using shareholders\' invested capital.',
+  formula:'ROE = Net Income ÷ Total Shareholders\' Equity × 100',
+  need:['netIncomeCurrent','totalEquityCurrent'],
+  calc:function(d){
+    if(d.totalEquityCurrent===0) return {error:'Total equity cannot be zero.'};
+    var r = d.netIncomeCurrent/d.totalEquityCurrent*100;
+    var tone = r>20?'good':(r>=10?'avg':'weak');
+    var note = r>20?'Excellent profitability.':(r>=10?'Reasonable level.':'Relatively weak profitability.');
+    return {value:r, unit:'%', tone:tone, note:note, text: fmt(d.netIncomeCurrent)+' ÷ '+fmt(d.totalEquityCurrent)+' × 100 = '+fmt(r)+'%'};
+  }
+},
+{
+  id:'npm', cat:'ratio', tag:'NPM', title:'Net Profit Margin',
+  def:'Shows what percentage of total revenue ends up as actual profit — an indicator of cost control.',
+  formula:'NPM = Net Income ÷ Revenue × 100',
+  need:['netIncomeCurrent','revenueCurrent'],
+  calc:function(d){
+    if(d.revenueCurrent===0) return {error:'Revenue cannot be zero.'};
+    var r = d.netIncomeCurrent/d.revenueCurrent*100;
+    var tone = r>15?'good':(r>=5?'avg':'weak');
+    var note = r>15?'Strong margin.':(r>=5?'Moderate margin — varies by industry.':'Thin margin — check the cost structure.');
+    return {value:r, unit:'%', tone:tone, note:note, text: fmt(d.netIncomeCurrent)+' ÷ '+fmt(d.revenueCurrent)+' × 100 = '+fmt(r)+'%'};
+  }
+},
+{
+  id:'de', cat:'ratio', tag:'D/E', title:'Debt-to-Equity Ratio',
+  def:'Shows how reliant a company is on debt versus shareholders\' capital to fund its operations.',
+  formula:'D/E = Total Debt ÷ Total Equity',
+  need:['totalDebtCurrent','totalEquityCurrent'],
+  calc:function(d){
+    if(d.totalEquityCurrent===0) return {error:'Total equity cannot be zero.'};
+    var r = d.totalDebtCurrent/d.totalEquityCurrent;
+    var tone = r<1?'good':(r<=2?'avg':'weak');
+    var note = r<1?'Conservative debt structure.':(r<=2?'Moderate reliance on debt.':'High reliance on debt — greater financial risk.');
+    return {value:r, unit:'x', tone:tone, note:note, text: fmt(d.totalDebtCurrent)+' ÷ '+fmt(d.totalEquityCurrent)+' = '+fmt(r)};
+  }
+},
+{
+  id:'icr', cat:'ratio', tag:'ICR', title:'Interest Coverage Ratio',
+  def:'Shows how many times a company\'s operating profit (EBIT) can cover its interest expense — a measure of debt-servicing capacity.',
+  formula:'ICR = EBIT ÷ Interest Expense',
+  need:['ebitCurrent','interestExpenseCurrent'],
+  calc:function(d){
+    if(d.interestExpenseCurrent===0) return {error:'Interest expense cannot be zero.'};
+    var r = d.ebitCurrent/d.interestExpenseCurrent;
+    var tone = r>5?'good':(r>=2?'avg':'weak');
+    var note = r>5?'Comfortable capacity to service interest.':(r>=2?'Moderate safety margin.':'Risky position for covering interest payments.');
+    return {value:r, unit:'x', tone:tone, note:note, text: fmt(d.ebitCurrent)+' ÷ '+fmt(d.interestExpenseCurrent)+' = '+fmt(r)};
+  }
+},
+{
+  id:'cr', cat:'ratio', tag:'CR', title:'Current Ratio',
+  def:'Shows whether a company\'s current assets are sufficient to cover its short-term liabilities — a liquidity measure.',
+  formula:'Current Ratio = Current Assets ÷ Current Liabilities',
+  need:['currentAssetsCurrent','currentLiabilitiesCurrent'],
+  calc:function(d){
+    if(d.currentLiabilitiesCurrent===0) return {error:'Current liabilities cannot be zero.'};
+    var r = d.currentAssetsCurrent/d.currentLiabilitiesCurrent;
+    var tone = r>1.5?'good':(r>=1?'avg':'weak');
+    var note = r>1.5?'Healthy liquidity position.':(r>=1?'Acceptable level.':'May struggle to cover short-term liabilities.');
+    return {value:r, unit:'x', tone:tone, note:note, text: fmt(d.currentAssetsCurrent)+' ÷ '+fmt(d.currentLiabilitiesCurrent)+' = '+fmt(r)};
+  }
+},
+{
+  id:'cfoni', cat:'ratio', tag:'CFO/NI', title:'Operating Cash Flow to Net Income Ratio',
+  def:'Shows how well reported net income is backed by actual cash flow — an important check on earnings quality.',
+  formula:'CFO/NI = Cash Flow from Operations ÷ Net Income',
+  need:['cfoCurrent','netIncomeCurrent'],
+  calc:function(d){
+    if(d.netIncomeCurrent===0) return {error:'Net income cannot be zero.'};
+    var r = d.cfoCurrent/d.netIncomeCurrent;
+    var tone = r>=1?'good':(r>=0.8?'avg':'weak');
+    var note = r>=1?'Earnings are well backed by real cash — a good sign.':(r>=0.8?'Reasonably backed — keep an eye on it.':'Cash flow lags earnings — possible accrual risk.');
+    return {value:r, unit:'x', tone:tone, note:note, text: fmt(d.cfoCurrent)+' ÷ '+fmt(d.netIncomeCurrent)+' = '+fmt(r)};
+  }
+},
+{
+  id:'dy', cat:'ratio', tag:'DY', title:'Dividend Yield',
+  def:'Shows the annual return from dividends relative to the current market price — important for income-focused investors.',
+  formula:'Dividend Yield = Dividend per Share ÷ Market Price × 100',
+  need:['dividendPerShare','marketPrice'],
+  calc:function(d){
+    if(d.marketPrice===0) return {error:'Market price cannot be zero.'};
+    var r = d.dividendPerShare/d.marketPrice*100;
+    var tone = r>6?'good':(r>=3?'avg':'weak');
+    var note = r>6?'High dividend yield.':(r>=3?'Moderate yield.':'Relatively low yield — normal for growth-focused companies.');
+    return {value:r, unit:'%', tone:tone, note:note, text: fmt(d.dividendPerShare)+' ÷ '+fmt(d.marketPrice)+' × 100 = '+fmt(r)+'%'};
+  }
+},
+{
+  id:'dpr', cat:'ratio', tag:'DPR', title:'Dividend Payout Ratio',
+  def:'Shows what portion of total earnings a company distributes as dividends, versus what it reinvests in the business.',
+  formula:'Payout Ratio = Dividend per Share ÷ EPS × 100',
+  need:['dividendPerShare','epsCurrent'],
+  calc:function(d){
+    if(d.epsCurrent===0) return {error:'EPS cannot be zero.'};
+    var r = d.dividendPerShare/d.epsCurrent*100;
+    var tone = r>100?'weak':(r<=40?'good':(r<=70?'avg':'weak'));
+    var note = r>100?'Paying out more than it earns — a caution flag.':(r<=40?'Reinvestment-focused, with room for growth.':(r<=70?'A balanced split between profit retention and payout.':'High payout — can be normal for a mature company.'));
+    return {value:r, unit:'%', tone:tone, note:note, text: fmt(d.dividendPerShare)+' ÷ '+fmt(d.epsCurrent)+' × 100 = '+fmt(r)+'%'};
+  }
+},
+{
+  id:'epsg', cat:'ratio', tag:'EPS-G', title:'EPS Growth Rate',
+  def:'Shows the year-over-year percentage change in earnings per share.',
+  formula:'EPS Growth = (Current EPS − Previous EPS) ÷ |Previous EPS| × 100',
+  need:['epsCurrent','epsPrevious'],
+  calc:function(d){
+    if(d.epsPrevious===0) return {error:'Previous year EPS cannot be zero.'};
+    var r = (d.epsCurrent-d.epsPrevious)/Math.abs(d.epsPrevious)*100;
+    var tone = r>15?'good':(r>=0?'avg':'weak');
+    var note = r>15?'Strong growth.':(r>=0?'Slow but positive growth.':'Earnings declined — worth investigating why.');
+    return {value:r, unit:'%', tone:tone, note:note,
+      text:'('+fmt(d.epsCurrent)+' − '+fmt(d.epsPrevious)+') ÷ |'+fmt(d.epsPrevious)+'| × 100 = '+fmt(r)+'%'};
+  }
+},
+{
+  id:'cagr', cat:'ratio', tag:'CAGR', title:'Compound Annual Growth Rate (CAGR)',
+  def:'Shows the average annual growth rate of any figure (earnings, revenue, or share price) over multiple years.',
+  formula:'CAGR = [(Ending Value ÷ Beginning Value)^(1/n) − 1] × 100',
+  need:['cagrBeginningValue','cagrEndingValue','cagrYears'],
+  calc:function(d){
+    if(d.cagrBeginningValue<=0) return {error:'Beginning value must be greater than zero.'};
+    if(d.cagrYears<=0) return {error:'Number of years must be greater than zero.'};
+    var r = (Math.pow(d.cagrEndingValue/d.cagrBeginningValue, 1/d.cagrYears)-1)*100;
+    var tone = r>15?'good':(r>=5?'avg':'weak');
+    var note = r>15?'Strong long-term growth.':(r>=5?'Moderate growth.':'Slow growth or contraction.');
+    return {value:r, unit:'%', tone:tone, note:note,
+      text:'('+fmt(d.cagrEndingValue)+' ÷ '+fmt(d.cagrBeginningValue)+')^(1/'+fmt(d.cagrYears,0)+') − 1 → '+fmt(r)+'%'};
+  }
+},
+
+/* ---------------- MODELS ---------------- */
+{
+  id:'piotroski', cat:'model', tag:'F-Score', title:'Piotroski F-Score',
+  def:'Scores a company from 0 to 9 based on nine financial criteria across profitability, leverage/liquidity, and operating efficiency.',
+  formula:'Each of 9 criteria that passes scores 1 point. Total score = sum (max 9)',
+  need:['netIncomeCurrent','netIncomePrevious','totalAssetsCurrent','totalAssetsPrevious','cfoCurrent',
+    'longTermDebtCurrent','longTermDebtPrevious','currentAssetsCurrent','currentLiabilitiesCurrent',
+    'currentAssetsPrevious','currentLiabilitiesPrevious','sharesOutstandingCurrent','sharesOutstandingPrevious',
+    'revenueCurrent','cogsCurrent','revenuePrevious','cogsPrevious'],
+  calc:function(d){
+    if(d.totalAssetsCurrent===0||d.totalAssetsPrevious===0||d.currentLiabilitiesCurrent===0||d.currentLiabilitiesPrevious===0||d.revenueCurrent===0||d.revenuePrevious===0)
+      return {error:'None of the denominators can be zero.'};
+    var roaCur = d.netIncomeCurrent/d.totalAssetsCurrent, roaPrev = d.netIncomePrevious/d.totalAssetsPrevious;
+    var gpCur = d.revenueCurrent-d.cogsCurrent, gpPrev = d.revenuePrevious-d.cogsPrevious;
+    var c = [];
+    c.push({l:'Return on Assets (ROA) is positive', pass: roaCur>0});
+    c.push({l:'Operating cash flow (CFO) is positive', pass: d.cfoCurrent>0});
+    c.push({l:'ROA improved versus last year', pass: roaCur>roaPrev});
+    c.push({l:'CFO exceeds net income (quality of earnings)', pass: d.cfoCurrent>d.netIncomeCurrent});
+    c.push({l:'Leverage (long-term debt / assets) decreased', pass: (d.longTermDebtCurrent/d.totalAssetsCurrent) < (d.longTermDebtPrevious/d.totalAssetsPrevious)});
+    c.push({l:'Current ratio improved', pass: (d.currentAssetsCurrent/d.currentLiabilitiesCurrent) > (d.currentAssetsPrevious/d.currentLiabilitiesPrevious)});
+    c.push({l:'No new shares issued (no dilution)', pass: d.sharesOutstandingCurrent<=d.sharesOutstandingPrevious});
+    c.push({l:'Gross margin improved', pass: (gpCur/d.revenueCurrent) > (gpPrev/d.revenuePrevious)});
+    c.push({l:'Asset turnover improved', pass: (d.revenueCurrent/d.totalAssetsCurrent) > (d.revenuePrevious/d.totalAssetsPrevious)});
+    var score = 0; c.forEach(function(x){ if(x.pass) score++; });
+    var tone = score>=8?'good':(score>=5?'avg':'weak');
+    var note = score>=8?'Fundamentally strong company.':(score>=5?'Moderate fundamental strength — dig deeper.':'Fundamental weaknesses present — analyze with caution.');
+    return {value:score, unit:'/ 9', tone:tone, note:note, criteria:c, text:'Criteria passed: '+score+' out of 9'};
+  }
+},
+{
+  id:'altman', cat:'model', tag:'Z-Score', title:'Altman Z-Score',
+  def:'A well-established model for assessing bankruptcy risk — a weighted sum of five financial ratios.',
+  formula:'Z = 1.2A + 1.4B + 3.3C + 0.6D + 1.0E',
+  need:['currentAssetsCurrent','currentLiabilitiesCurrent','totalAssetsCurrent','retainedEarningsCurrent','ebitCurrent','marketCap','totalLiabilitiesCurrent','revenueCurrent'],
+  calc:function(d){
+    if(d.totalAssetsCurrent===0||d.totalLiabilitiesCurrent===0) return {error:'Total assets or total liabilities cannot be zero.'};
+    var wc = d.currentAssetsCurrent-d.currentLiabilitiesCurrent;
+    var A=wc/d.totalAssetsCurrent, B=d.retainedEarningsCurrent/d.totalAssetsCurrent, C=d.ebitCurrent/d.totalAssetsCurrent, Dd=d.marketCap/d.totalLiabilitiesCurrent, E=d.revenueCurrent/d.totalAssetsCurrent;
+    var z = 1.2*A+1.4*B+3.3*C+0.6*Dd+1.0*E;
+    var tone = z>2.99?'good':(z>=1.81?'avg':'weak');
+    var note = z>2.99?'Safe Zone — low bankruptcy risk.':(z>=1.81?'Grey Zone — should be monitored carefully.':'Distress Zone — significant financial risk.');
+    return {value:z, unit:'', tone:tone, note:note,
+      text:'A='+fmt(A)+', B='+fmt(B)+', C='+fmt(C)+', D='+fmt(Dd)+', E='+fmt(E)+'\nZ = 1.2×'+fmt(A)+' + 1.4×'+fmt(B)+' + 3.3×'+fmt(C)+' + 0.6×'+fmt(Dd)+' + 1.0×'+fmt(E)+' = '+fmt(z)};
+  }
+},
+{
+  id:'beneish', cat:'model', tag:'M-Score', title:'Beneish M-Score',
+  def:'A statistical model that flags the likelihood of earnings manipulation, based on eight financial indices.',
+  formula:'M = −4.84 + 0.92·DSRI + 0.528·GMI + 0.404·AQI + 0.892·SGI + 0.115·DEPI − 0.172·SGAI + 4.679·TATA − 0.327·LVGI',
+  need:['receivablesCurrent','receivablesPrevious','revenueCurrent','revenuePrevious','cogsCurrent','cogsPrevious',
+    'currentAssetsCurrent','currentAssetsPrevious','ppeCurrent','ppePrevious','totalAssetsCurrent','totalAssetsPrevious',
+    'depreciationCurrent','depreciationPrevious','sgaCurrent','sgaPrevious','netIncomeCurrent','cfoCurrent',
+    'currentLiabilitiesCurrent','currentLiabilitiesPrevious','totalDebtCurrent','totalDebtPrevious'],
+  calc:function(d){
+    if(d.revenueCurrent===0||d.revenuePrevious===0||d.totalAssetsCurrent===0||d.totalAssetsPrevious===0)
+      return {error:'Revenue and total assets cannot be zero.'};
+    var DSRI = (d.receivablesCurrent/d.revenueCurrent)/(d.receivablesPrevious/d.revenuePrevious);
+    var GMI = ((d.revenuePrevious-d.cogsPrevious)/d.revenuePrevious)/((d.revenueCurrent-d.cogsCurrent)/d.revenueCurrent);
+    var AQIc = 1-(d.currentAssetsCurrent+d.ppeCurrent)/d.totalAssetsCurrent;
+    var AQIp = 1-(d.currentAssetsPrevious+d.ppePrevious)/d.totalAssetsPrevious;
+    var AQI = AQIc/AQIp;
+    var SGI = d.revenueCurrent/d.revenuePrevious;
+    var DEPIp = d.depreciationPrevious/(d.depreciationPrevious+d.ppePrevious);
+    var DEPIc = d.depreciationCurrent/(d.depreciationCurrent+d.ppeCurrent);
+    var DEPI = DEPIp/DEPIc;
+    var SGAI = (d.sgaCurrent/d.revenueCurrent)/(d.sgaPrevious/d.revenuePrevious);
+    var TATA = (d.netIncomeCurrent-d.cfoCurrent)/d.totalAssetsCurrent;
+    var LVGI = ((d.totalDebtCurrent+d.currentLiabilitiesCurrent)/d.totalAssetsCurrent)/((d.totalDebtPrevious+d.currentLiabilitiesPrevious)/d.totalAssetsPrevious);
+    var M = -4.84+0.92*DSRI+0.528*GMI+0.404*AQI+0.892*SGI+0.115*DEPI-0.172*SGAI+4.679*TATA-0.327*LVGI;
+    var tone = M> -1.78 ? 'weak' : (M>= -2.22 ? 'avg':'good');
+    var note = M> -1.78 ? 'Indicates a high likelihood of earnings manipulation — investigate further.' : (M>= -2.22 ? 'Moderate risk — proceed with extra caution.':'Low likelihood of manipulation based on this model.');
+    return {value:M, unit:'', tone:tone, note:note,
+      extra:[
+        {l:'DSRI', v:fmt(DSRI)}, {l:'GMI', v:fmt(GMI)}, {l:'AQI', v:fmt(AQI)}, {l:'SGI', v:fmt(SGI)},
+        {l:'DEPI', v:fmt(DEPI)}, {l:'SGAI', v:fmt(SGAI)}, {l:'TATA', v:fmt(TATA,4)}, {l:'LVGI', v:fmt(LVGI)}
+      ],
+      text:'M-Score = '+fmt(M)+'  (rule of thumb: > −1.78 higher risk, < −2.22 lower risk)'};
+  }
+},
+{
+  id:'sloan', cat:'model', tag:'Sloan', title:'Sloan Ratio',
+  def:'Measures how much of net income comes from accounting accruals rather than actual cash — a high value raises doubts about earnings quality.',
+  formula:'Sloan Ratio = (Net Income − CFO) ÷ Average Total Assets × 100',
+  need:['netIncomeCurrent','cfoCurrent','totalAssetsCurrent','totalAssetsPrevious'],
+  calc:function(d){
+    var avgTA = (d.totalAssetsCurrent+d.totalAssetsPrevious)/2;
+    if(avgTA===0) return {error:'Average total assets cannot be zero.'};
+    var r = (d.netIncomeCurrent-d.cfoCurrent)/avgTA*100;
+    var a = Math.abs(r);
+    var tone = a<5?'good':(a<=10?'avg':'weak');
+    var note = a<5?'Low accruals — earnings quality looks reliable.':(a<=10?'Moderate accruals — worth watching.':'High accruals — caution warranted on earnings quality.');
+    return {value:r, unit:'%', tone:tone, note:note,
+      text:'Average assets = ('+fmt(d.totalAssetsCurrent)+' + '+fmt(d.totalAssetsPrevious)+') ÷ 2 = '+fmt(avgTA)+'\n('+fmt(d.netIncomeCurrent)+' − '+fmt(d.cfoCurrent)+') ÷ '+fmt(avgTA)+' × 100 = '+fmt(r)+'%'};
+  }
+},
+{
+  id:'ohlson', cat:'model', tag:'O-Score', title:'Ohlson O-Score',
+  def:'Uses logistic regression to estimate a company\'s probability of bankruptcy. The original model\'s US price-level (GNP deflator) adjustment has been simplified here, so treat results as approximate.',
+  formula:'O = −1.32 − 0.407·ln(TA) + 6.03·(TL/TA) − 1.43·(WC/TA) + 0.0757·(CL/CA) − 1.72·OENEG − 2.37·(NI/TA) − 1.83·(CFO/TL) + 0.285·INTWO − 0.521·CHIN; Probability = e^O/(1+e^O)',
+  need:['totalAssetsCurrent','totalLiabilitiesCurrent','currentAssetsCurrent','currentLiabilitiesCurrent','netIncomeCurrent','netIncomePrevious','cfoCurrent'],
+  calc:function(d){
+    if(d.totalAssetsCurrent<=0) return {error:'Total assets must be greater than zero.'};
+    if(d.currentAssetsCurrent===0||d.totalLiabilitiesCurrent===0) return {error:'Current assets or total liabilities cannot be zero.'};
+    var wc = d.currentAssetsCurrent-d.currentLiabilitiesCurrent;
+    var oeneg = d.totalLiabilitiesCurrent>d.totalAssetsCurrent?1:0;
+    var intwo = (d.netIncomeCurrent<0 && d.netIncomePrevious<0)?1:0;
+    var chinDenom = Math.abs(d.netIncomeCurrent)+Math.abs(d.netIncomePrevious);
+    var chin = chinDenom===0?0:(d.netIncomeCurrent-d.netIncomePrevious)/chinDenom;
+    var O = -1.32 -0.407*Math.log(d.totalAssetsCurrent) +6.03*(d.totalLiabilitiesCurrent/d.totalAssetsCurrent) -1.43*(wc/d.totalAssetsCurrent) +0.0757*(d.currentLiabilitiesCurrent/d.currentAssetsCurrent) -1.72*oeneg -2.37*(d.netIncomeCurrent/d.totalAssetsCurrent) -1.83*(d.cfoCurrent/d.totalLiabilitiesCurrent) +0.285*intwo -0.521*chin;
+    var prob = Math.exp(O)/(1+Math.exp(O));
+    var tone = prob>0.5?'weak':(prob>=0.2?'avg':'good');
+    var note = prob>0.5?'Suggests a relatively high probability of bankruptcy.':(prob>=0.2?'Moderate risk — cross-check with other indicators.':'Suggests a low probability of bankruptcy.');
+    return {value:prob*100, unit:'% probability', tone:tone, note:note,
+      text:'O-Score = '+fmt(O)+' → Probability of bankruptcy = '+fmt(prob*100)+'%'};
+  }
+},
+{
+  id:'dupont', cat:'model', tag:'DuPont', title:'DuPont Analysis',
+  def:'Breaks ROE down into three drivers — profit margin, asset use efficiency, and financial leverage — to reveal what\'s really driving ROE.',
+  formula:'ROE = Net Profit Margin × Asset Turnover × Equity Multiplier',
+  need:['netIncomeCurrent','revenueCurrent','totalAssetsCurrent','totalEquityCurrent'],
+  calc:function(d){
+    if(d.revenueCurrent===0||d.totalAssetsCurrent===0||d.totalEquityCurrent===0) return {error:'None of the denominators can be zero.'};
+    var npm=d.netIncomeCurrent/d.revenueCurrent, atr=d.revenueCurrent/d.totalAssetsCurrent, em=d.totalAssetsCurrent/d.totalEquityCurrent;
+    var roe = npm*atr*em*100;
+    var tone = roe>20?'good':(roe>=10?'avg':'weak');
+    var note = roe>20?'High ROE — see the breakdown below for what\'s driving it.':(roe>=10?'Moderate ROE.':'Low ROE — check which driver is weakest.');
+    return {value:roe, unit:'%', tone:tone, note:note,
+      extra:[
+        {l:'Net Profit Margin', v:fmt(npm*100)+'%'},
+        {l:'Asset Turnover', v:fmt(atr)+'×'},
+        {l:'Equity Multiplier', v:fmt(em)+'×'}
+      ],
+      text:'ROE = '+fmt(npm*100)+'% × '+fmt(atr)+' × '+fmt(em)+' = '+fmt(roe)+'%'};
+  }
+},
+{
+  id:'dgm', cat:'model', tag:'DGM', title:'Dividend Growth Model (Gordon Growth Model)',
+  def:'Discounts future dividend payments to their present value to estimate the intrinsic value of a share — best suited to stable dividend payers.',
+  formula:'Value = D1 ÷ (r − g), where D1 = D0 × (1 + g)',
+  need:['dividendPerShare','dividendGrowthRate','requiredReturn'],
+  calc:function(d){
+    if(d.requiredReturn<=d.dividendGrowthRate) return {error:'Required return (r) must be greater than the growth rate (g).'};
+    var d1 = d.dividendPerShare*(1+d.dividendGrowthRate/100);
+    var value = d1/((d.requiredReturn-d.dividendGrowthRate)/100);
+    var tone='info', note='This is an estimated intrinsic value — compare it against the market price.';
+    if(!isNaN(d.marketPrice) && d.marketPrice>0){
+      tone = value>d.marketPrice?'good':'weak';
+      note = value>d.marketPrice?'Intrinsic value exceeds the market price — possibly undervalued.':'Intrinsic value is below the market price — possibly overvalued.';
+    }
+    return {value:value, unit:'BDT/share', tone:tone, note:note,
+      text:'D1 = '+fmt(d.dividendPerShare)+' × (1+'+fmt(d.dividendGrowthRate)+'%) = '+fmt(d1)+'\nValue = '+fmt(d1)+' ÷ ('+fmt(d.requiredReturn)+'%−'+fmt(d.dividendGrowthRate)+'%) = '+fmt(value)+' BDT'};
+  }
+},
+{
+  id:'dcf', cat:'model', tag:'DCF', title:'Discounted Cash Flow (DCF) — Simplified',
+  def:'Projects future free cash flow and discounts it to present value to estimate a company\'s intrinsic value.',
+  formula:'EV = Σ [FCFₜ ÷ (1+WACC)ᵗ] + present value of terminal value',
+  need:['fcfCurrent','fcfGrowthRate','projectionYears','wacc','terminalGrowthRate','sharesOutstandingCurrent'],
+  calc:function(d){
+    if(d.projectionYears<=0) return {error:'Projection period must be greater than zero.'};
+    if(d.wacc<=d.terminalGrowthRate) return {error:'WACC must be greater than the terminal growth rate.'};
+    if(d.sharesOutstandingCurrent<=0) return {error:'Shares outstanding must be greater than zero.'};
+    var n = Math.round(d.projectionYears);
+    var pv = 0, fcfT = d.fcfCurrent;
+    for(var t=1;t<=n;t++){
+      fcfT = d.fcfCurrent*Math.pow(1+d.fcfGrowthRate/100, t);
+      pv += fcfT/Math.pow(1+d.wacc/100, t);
+    }
+    var tv = fcfT*(1+d.terminalGrowthRate/100)/((d.wacc-d.terminalGrowthRate)/100);
+    var pvtv = tv/Math.pow(1+d.wacc/100, n);
+    var ev = pv+pvtv;
+    var netDebt = isNaN(d.netDebt)?0:d.netDebt;
+    var equityValue = ev-netDebt;
+    var perShare = equityValue/d.sharesOutstandingCurrent;
+    return {value:perShare, unit:'BDT/share', tone:'info',
+      note:'This is an estimated intrinsic value — results are highly sensitive to the assumed rates.',
+      extra:[
+        {l:'PV of Projected Cash Flows', v:fmt(pv)},
+        {l:'PV of Terminal Value', v:fmt(pvtv)},
+        {l:'Enterprise Value', v:fmt(ev)},
+        {l:'Equity Value', v:fmt(equityValue)}
+      ],
+      text:'Enterprise Value = '+fmt(pv)+' + '+fmt(pvtv)+' = '+fmt(ev)+'\nValue per Share = ('+fmt(ev)+' − '+fmt(netDebt)+') ÷ '+fmt(d.sharesOutstandingCurrent)+' = '+fmt(perShare)+' BDT'};
+  }
+},
+{
+  id:'capm', cat:'model', tag:'CAPM', title:'Capital Asset Pricing Model (CAPM)',
+  def:'Estimates an investor\'s minimum required return on a stock given its risk (beta) — also commonly used as the discount rate in DCF.',
+  formula:'Expected Return = Risk-Free Rate + Beta × (Market Return − Risk-Free Rate)',
+  need:['riskFreeRate','beta','marketReturn'],
+  calc:function(d){
+    var r = d.riskFreeRate + d.beta*(d.marketReturn-d.riskFreeRate);
+    return {value:r, unit:'%', tone:'info', note:'This is the minimum expected return given the stock\'s risk — not a guarantee of actual returns.',
+      text: fmt(d.riskFreeRate)+'% + '+fmt(d.beta)+' × ('+fmt(d.marketReturn)+'% − '+fmt(d.riskFreeRate)+'%) = '+fmt(r)+'%'};
+  }
+}
+];
+
+var TONE_LABEL = {good:'Good', avg:'Average', weak:'Caution', info:'Info'};
+
+/* ===================== Build the form ===================== */
+function buildForm(){
+  var form = document.getElementById('dataForm');
+  var html = '';
+  SECTIONS.forEach(function(s, i){
+    html += '<details class="section" open><summary>'+
+      '<span>'+s.title+'</span>'+
+      '<span style="display:flex; align-items:center; gap:10px;"><span class="count">'+s.fields.length+' fields</span><span class="chev">&#9656;</span></span>'+
+      '</summary><div class="section-body">';
+    if(s.hint) html += '<p class="section-hint">'+s.hint+'</p>';
+    html += '<div class="fgrid">';
+    s.fields.forEach(function(f){
+      html += '<div class="field"><label>'+f.l+' <span class="unit">'+(f.u?('('+f.u+')'):'')+'</span></label>'+
+        '<input type="number" step="any" id="inp_'+f.k+'" placeholder="Enter value"></div>';
+    });
+    html += '</div></div></details>';
+  });
+  form.innerHTML = html;
+}
+
+/* ===================== Calculate & render results ===================== */
+function collectData(){
+  var data = {};
+  SECTIONS.forEach(function(s){
+    s.fields.forEach(function(f){
+      var el = document.getElementById('inp_'+f.k);
+      data[f.k] = pf(el ? el.value : '');
+    });
+  });
+  return data;
+}
+
+function missingFields(need, data){
+  return need.filter(function(k){ return isNaN(data[k]); }).map(function(k){ return FIELD_LABEL[k] || k; });
+}
+
+function renderCard(m, data){
+  var html = '<div class="card">';
+  html += '<div class="eyebrow">'+(m.cat==='ratio'?'Ratio':'Model')+' · '+m.tag+'</div>';
+  html += '<h3>'+m.title+'</h3>';
+  html += '<p class="cdef">'+m.def+'</p>';
+  html += '<div class="cformula">'+m.formula+'</div>';
+
+  var missing = missingFields(m.need, data);
+  if(missing.length){
+    html += '<div class="missing-msg">Please fill in: <b>'+missing.join(', ')+'</b></div>';
+    html += '</div>';
+    return html;
+  }
+
+  var out;
+  try{ out = m.calc(data); }
+  catch(e){ out = {error:'Could not calculate this metric — please check your inputs.'}; }
+
+  if(out.error){
+    html += '<div class="error-msg">'+out.error+'</div></div>';
+    return html;
+  }
+
+  html += '<div class="result-row">';
+  html += '<div><span class="result-value">'+fmt(out.value)+'</span><span class="result-unit">'+(out.unit||'')+'</span></div>';
+  if(out.tone) html += '<span class="stamp '+out.tone+'">'+TONE_LABEL[out.tone]+'</span>';
+  html += '</div>';
+  if(out.note) html += '<div class="result-note">'+out.note+'</div>';
+
+  if(out.criteria){
+    html += '<ul class="criteria-list">';
+    out.criteria.forEach(function(c){
+      html += '<li class="'+(c.pass?'pass':'fail')+'"><span class="mark">'+(c.pass?'&#10003;':'&#10007;')+'</span><span>'+c.l+'</span></li>';
+    });
+    html += '</ul>';
+  }
+
+  if(out.extra){
+    html += '<div class="extra-rows">';
+    out.extra.forEach(function(e){ html += '<div><span>'+e.l+'</span><b>'+e.v+'</b></div>'; });
+    html += '</div>';
+  }
+
+  if(out.text){
+    html += '<div class="breakdown"><div class="lbl">How this was calculated</div><pre>'+out.text+'</pre></div>';
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function calculateAll(){
+  var data = collectData();
+  var body = document.getElementById('resultsBody');
+  var sub = document.getElementById('resultsSub');
+  sub.textContent = 'Computed from the data you entered above. Update any field and click Calculate again to refresh.';
+
+  var ratios = METRICS.filter(function(m){ return m.cat==='ratio'; });
+  var models = METRICS.filter(function(m){ return m.cat==='model'; });
+
+  var html = '<div class="cat-heading">Ratios</div><div class="cards">';
+  ratios.forEach(function(m){ html += renderCard(m, data); });
+  html += '</div>';
+  html += '<div class="cat-heading">Valuation & Scoring Models</div><div class="cards">';
+  models.forEach(function(m){ html += renderCard(m, data); });
+  html += '</div>';
+
+  body.innerHTML = html;
+  document.getElementById('resultsWrap').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+/* ===================== Init ===================== */
+buildForm();
+document.getElementById('resultsBody').innerHTML = '<div class="placeholder-panel">No results yet — fill in the data above and click "Calculate All Metrics".</div>';
+document.getElementById('calcBtn').addEventListener('click', calculateAll);
+</script>
+</body>
+</html>
