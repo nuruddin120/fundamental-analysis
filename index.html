@@ -172,6 +172,22 @@
 
   .field-help{
     margin:7px 2px 0;
+  }
+  .field-help summary{
+    cursor:pointer;
+    font-size:11.5px;
+    color:var(--accent);
+    font-weight:500;
+    list-style:none;
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+  }
+  .field-help summary::-webkit-details-marker{display:none;}
+  .field-help summary::before{content:"▸"; font-size:10px; color:var(--accent);}
+  .field-help[open] summary::before{content:"▾";}
+  .field-help p{
+    margin:6px 0 0;
     font-size:12px;
     color:var(--text-muted);
     line-height:1.55;
@@ -257,6 +273,23 @@
   /* ---------- Results ---------- */
   .results{padding:8px 0 76px;}
   .results-head{margin:32px 0 18px;}
+  .results-head-row{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+  .pdf-btn{
+    background:var(--bg);
+    color:var(--accent);
+    border:1.5px solid var(--accent);
+    padding:9px 18px;
+    border-radius:7px;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:background .12s ease, color .12s ease;
+    flex-shrink:0;
+  }
+  .pdf-btn:hover{background:var(--accent-soft);}
+  .print-only-header{display:none;}
   .results-head h2{font-size:22px; margin:0 0 6px; color:var(--text);}
   .results-head p{font-size:13.5px; color:var(--text-muted); margin:0;}
   .cat-heading{
@@ -380,12 +413,41 @@
     border-top:1px solid var(--border);
   }
   footer.site b{color:var(--text-muted); font-weight:600;}
+
+  /* ---------- Print / Save as PDF ---------- */
+  @media print{
+    * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; color-adjust:exact !important; }
+    .no-print{display:none !important;}
+    body{background:#fff;}
+    .actionbar{display:none !important;}
+    .wrap{max-width:100%; padding:0 6mm;}
+    .print-only-header{display:block !important; margin:0 0 14px;}
+    .print-only-header h1{font-size:18px; margin:0 0 4px; color:var(--text);}
+    .print-only-header p{font-size:11px; color:var(--text-muted); margin:0 0 10px; border-bottom:1px solid var(--border); padding-bottom:10px;}
+    .results{padding:0;}
+    .results-head{margin:0 0 6px;}
+    .pdf-btn{display:none !important;}
+    .cat-heading{margin:16px 0 10px; break-after:avoid;}
+    .cards{display:block;}
+    .card{
+      border:1px solid var(--border-strong);
+      box-shadow:none;
+      break-inside:avoid;
+      margin-bottom:9px;
+      animation:none;
+      padding:12px 14px 11px;
+    }
+    .card:hover{box-shadow:none;}
+    .breakdown pre{font-size:10.5px;}
+    .breakdown summary{display:none;}
+    .breakdown pre{display:block !important;}
+  }
 </style>
 </head>
 <body>
 
-<div class="topline"></div>
-<header class="site">
+<div class="topline no-print"></div>
+<header class="site no-print">
   <div class="brand">
     <div class="mark">L</div>
     <div>
@@ -396,7 +458,7 @@
   <div class="header-note">Enter each company's raw financial figures once — every ratio and valuation model below is calculated automatically from the same data set.</div>
 </header>
 
-<div class="intro">
+<div class="intro no-print">
   <div class="wrap">
     <h2>One data entry, every metric calculated</h2>
     <p>Fill in the raw financial data from a company's annual report (income statement, balance sheet, cash flow statement, and market data) in the sections below. Each field is used across the relevant ratios and models automatically — you never enter the same number twice.</p>
@@ -408,7 +470,7 @@
   </div>
 </div>
 
-<div class="wrap formzone" id="formzone">
+<div class="wrap formzone no-print" id="formzone">
   <form id="dataForm"></form>
 
   <div class="actionbar">
@@ -425,13 +487,22 @@
 
 <div class="wrap results" id="resultsWrap">
   <div class="results-head">
-    <h2>Results</h2>
-    <p id="resultsSub">Fill in the data above and click "Calculate All Metrics" to see your results here.</p>
+    <div class="results-head-row">
+      <div>
+        <h2>Results</h2>
+        <p id="resultsSub">Fill in the data above and click "Calculate All Metrics" to see your results here.</p>
+      </div>
+      <button type="button" class="pdf-btn" id="pdfBtn" style="display:none;">⬇ Download PDF</button>
+    </div>
+  </div>
+  <div id="printHeader" class="print-only-header">
+    <h1>Ledger — Fundamental Analysis Report</h1>
+    <p id="printDate"></p>
   </div>
   <div id="resultsBody"></div>
 </div>
 
-<footer class="site">
+<footer class="site no-print">
   This tool is built for <b>educational and analytical purposes only</b> — it is not investment advice.<br>
   Always verify figures against a company's audited financial statements, and consult a licensed investment analyst before making investment decisions.
 </footer>
@@ -973,7 +1044,7 @@ function buildForm(){
     s.fields.forEach(function(f){
       html += '<div class="field"><label>'+f.l+' <span class="unit">'+(f.u?('('+f.u+')'):'')+'</span></label>'+
         '<input type="number" step="any" id="inp_'+f.k+'" placeholder="Enter value">'+
-        (f.help ? '<p class="field-help">'+f.help+'</p>' : '')+
+        (f.help ? '<details class="field-help"><summary>What does this mean?</summary><p>'+f.help+'</p></details>' : '')+
         '</div>';
     });
     html += '</div></div></details>';
@@ -1079,13 +1150,27 @@ function calculateAll(){
   html += '</div>';
 
   body.innerHTML = html;
+  document.getElementById('pdfBtn').style.display = 'inline-block';
+  document.getElementById('printDate').textContent = 'Generated on ' + new Date().toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'}) + ' · For educational and analytical purposes only, not investment advice.';
   document.getElementById('resultsWrap').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function downloadPdf(){
+  var openEls = document.querySelectorAll('details.breakdown');
+  var wasOpen = [];
+  openEls.forEach(function(d){ wasOpen.push(d.open); d.open = true; });
+  window.print();
+  window.addEventListener('afterprint', function restore(){
+    openEls.forEach(function(d, i){ d.open = wasOpen[i]; });
+    window.removeEventListener('afterprint', restore);
+  });
 }
 
 /* ===================== Init ===================== */
 buildForm();
 document.getElementById('resultsBody').innerHTML = '<div class="placeholder-panel">No results yet — fill in the data above and click "Calculate All Metrics".</div>';
 document.getElementById('calcBtn').addEventListener('click', calculateAll);
+document.getElementById('pdfBtn').addEventListener('click', downloadPdf);
 </script>
 </body>
 </html>
