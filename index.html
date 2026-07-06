@@ -350,6 +350,11 @@
   .stamp.avg{color:var(--avg); background:var(--avg-bg);}
   .stamp.weak{color:var(--weak); background:var(--weak-bg);}
   .stamp.info{color:var(--accent-2); background:var(--accent-2-soft);}
+  .stamp.pending{color:var(--text-faint); background:var(--surface-2);}
+  .stamp.pending::before{background:var(--text-faint);}
+
+  .card.pending{border-style:dashed; border-color:var(--border-strong);}
+  .card.pending h3, .card.pending .cdef{color:var(--text-muted);}
 
   .result-note{font-size:12.5px; color:var(--text-muted); margin-top:10px; line-height:1.6;}
 
@@ -640,7 +645,18 @@ var SECTIONS = [
 ];
 
 var FIELD_LABEL = {};
-SECTIONS.forEach(function(s){ s.fields.forEach(function(f){ FIELD_LABEL[f.k] = f.l; }); });
+var FIELD_SECTION = {};
+SECTIONS.forEach(function(s){ s.fields.forEach(function(f){ FIELD_LABEL[f.k] = f.l; FIELD_SECTION[f.k] = s.title; }); });
+function qualifiedLabel(k){
+  var label = FIELD_LABEL[k] || k;
+  var section = FIELD_SECTION[k] || '';
+  // only show the section tag when it disambiguates a Current/Previous Year duplicate
+  if(/Current Year|Previous Year/.test(section)){
+    var tag = /Previous Year/.test(section) ? 'Previous Year' : 'Current Year';
+    return label + ' (' + tag + ')';
+  }
+  return label;
+}
 
 /* ===================== Metric definitions ===================== */
 /* need: list of field keys required (besides those with "optional:true" handled inline) */
@@ -1079,19 +1095,20 @@ function collectData(){
 }
 
 function missingFields(need, data){
-  return need.filter(function(k){ return isNaN(data[k]); }).map(function(k){ return FIELD_LABEL[k] || k; });
+  return need.filter(function(k){ return isNaN(data[k]); }).map(function(k){ return qualifiedLabel(k); });
 }
 
 function renderCard(m, data){
-  var html = '<div class="card cat-'+m.cat+'">';
+  var missing = missingFields(m.need, data);
+  var html = '<div class="card cat-'+m.cat+(missing.length?' pending':'')+'">';
   html += '<div class="eyebrow">'+(m.cat==='ratio'?'Ratio':'Model')+' · '+m.tag+'</div>';
   html += '<h3>'+m.title+'</h3>';
   html += '<p class="cdef">'+m.def+'</p>';
   html += '<div class="cformula">'+m.formula+'</div>';
 
-  var missing = missingFields(m.need, data);
   if(missing.length){
-    html += '<div class="missing-msg">Please fill in: <b>'+missing.join(', ')+'</b></div>';
+    html += '<div class="result-row"><span class="stamp pending">⏳ Waiting for data</span></div>';
+    html += '<div class="missing-msg">⚠ Needs '+missing.length+' more field'+(missing.length>1?'s':'')+': <b>'+missing.join('; ')+'</b></div>';
     html += '</div>';
     return html;
   }
@@ -1137,10 +1154,18 @@ function calculateAll(){
   var data = collectData();
   var body = document.getElementById('resultsBody');
   var sub = document.getElementById('resultsSub');
-  sub.textContent = 'Computed from the data you entered above. Update any field and click Calculate again to refresh.';
 
   var ratios = METRICS.filter(function(m){ return m.cat==='ratio'; });
   var models = METRICS.filter(function(m){ return m.cat==='model'; });
+
+  var pendingCount = 0;
+  METRICS.forEach(function(m){ if(missingFields(m.need, data).length) pendingCount++; });
+  var doneCount = METRICS.length - pendingCount;
+  if(pendingCount === 0){
+    sub.textContent = 'All '+METRICS.length+' metrics calculated. Update any field and click Calculate again to refresh.';
+  } else {
+    sub.innerHTML = doneCount+' of '+METRICS.length+' metrics calculated. <b>'+pendingCount+' need more data</b> — cards marked "⏳ Waiting for data" below list exactly which fields to fill in.';
+  }
 
   var html = '<div class="cat-heading ratio"><span class="dot"></span>Ratios</div><div class="cards">';
   ratios.forEach(function(m){ html += renderCard(m, data); });
